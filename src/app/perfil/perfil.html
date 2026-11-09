@@ -1,0 +1,145 @@
+<!-- Raiz é <section class="page-content">, igual às demais telas. Usar
+     class="main-content" aqui fazia o bloco herdar do styles.scss global
+     margin-left:300px e min-height:100vh dentro de um container que já os
+     tinha, empurrando o conteúdo para a direita e abrindo um vão sob a navbar. -->
+<section class="page-content" *ngIf="usuarioLogado() as usuario">
+
+        <!-- ── Card principal do perfil ────────────────────── -->
+        <section class="profile-main-card">
+            <div class="profile-header-content d-flex align-items-center gap-4 flex-wrap">
+                <div class="profile-image-wrapper">
+                    <img loading="lazy" decoding="async" [src]="usuario.foto" alt="Foto do perfil" class="profile-main-image">
+                </div>
+
+                <div class="profile-info flex-grow-1">
+                    <h1 class="profile-page-name">{{ usuario.nome }}</h1>
+                    <p class="profile-page-level">{{ usuario.cargo }}</p>
+
+                    <div class="profile-tags">
+                        <div class="profile-tag" *ngIf="usuario.role === 'aluno'">
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-mail"></use></svg>
+                            <span>{{ gerarEmail(usuario.nome) }}</span>
+                        </div>
+                        <div class="profile-tag">
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-user"></use></svg>
+                            <span class="text-capitalize">Acesso: {{ usuario.role }}</span>
+                        </div>
+                        <div class="profile-tag" *ngIf="usuario.role === 'aluno'">
+                            <i class="bi bi-building"></i>
+                            <span>{{ alunoConfig.escola }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn-perfil-acao" (click)="abrirEdicao()">
+                        <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg>Editar Perfil
+                    </button>
+                    <button class="btn-perfil-acao secundario" (click)="irParaSenha()">
+                        <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-key"></use></svg>Alterar Senha
+                    </button>
+                </div>
+            </div>
+
+            <div class="alert alert-success py-2 mt-3 mb-0" *ngIf="mensagem()">{{ mensagem() }}</div>
+
+            <!-- Formulário de edição inline -->
+            <div class="edit-form mt-4" *ngIf="editando()">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="edit-label">Nome</label>
+                        <input type="text" class="edit-input" [(ngModel)]="formNome" placeholder="Seu nome">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="edit-label">Foto de perfil</label>
+                    <app-foto-perfil [foto]="usuario.foto" (alterada)="aoTrocarFoto()"></app-foto-perfil>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button class="btn-perfil-acao secundario" (click)="cancelarEdicao()">Cancelar</button>
+                    <button class="btn-perfil-acao" (click)="salvarPerfil()" [disabled]="salvando()">
+                        {{ salvando() ? 'Salvando…' : 'Salvar' }}
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Seção exclusiva para alunos ─────────────────── -->
+        <ng-container *ngIf="usuario.role === 'aluno'">
+
+            <section class="profile-summary-section">
+                <div class="row g-4">
+                    <div class="col-md-6 col-xl-4">
+                        <div class="summary-card">
+                            <div class="summary-card-top">
+                                <div class="summary-icon purple-summary">
+                                    <svg class="ic ic-rot-315" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowr"></use></svg>
+                                </div>
+                                <div>
+                                    <p class="summary-title">Progresso Semanal</p>
+                                    <h3 class="summary-number">{{ progressoGeral() }}%</h3>
+                                </div>
+                            </div>
+                            <div class="summary-progress-track">
+                                <div class="summary-progress-fill" [style.width.%]="progressoGeral()"></div>
+                            </div>
+                            <p class="summary-footer-text">Meta: bater a meta semanal de XP</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="middle-section mt-4">
+                <div class="row g-4">
+                    <div class="col-xl-6">
+                        <div class="content-card">
+                            <h2 class="section-card-title">
+                                <svg class="ic ic-rot-315 title-icon green-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowr"></use></svg> Progresso por Matéria
+                            </h2>
+                            <div class="subject-progress-list">
+                                <div class="subject-progress-item" *ngFor="let materia of materiasProgresso">
+                                    <div class="subject-progress-header">
+                                        <span>{{ materia.nome }}</span>
+                                        <span>{{ materia.porcentagem }}%</span>
+                                    </div>
+                                    <div class="subject-line-track">
+                                        <div class="subject-line-fill"
+                                            [ngClass]="materia.classeCor"
+                                            [style.width.%]="materia.porcentagem">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="content-card h-100">
+                            <h2 class="section-card-title">
+                                <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bars"></use></svg> Estatísticas
+                            </h2>
+                            <div class="row text-center g-4 mt-1">
+                                <div class="col-6" *ngFor="let stat of estatisticas()">
+                                    <div class="stat-box">
+                                        <h3 class="stat-number" [ngClass]="stat.classeCor">{{ stat.valor }}</h3>
+                                        <p class="stat-label">{{ stat.label }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </ng-container>
+
+        <!-- ── Corpo por perfil (mesmo padrão de configuracoes.html) ── -->
+        <ng-container *ngIf="usuario.role === 'professor'">
+            <app-perfil-professor></app-perfil-professor>
+        </ng-container>
+
+        <ng-container *ngIf="usuario.role === 'diretor'">
+            <app-perfil-diretor></app-perfil-diretor>
+        </ng-container>
+
+</section>

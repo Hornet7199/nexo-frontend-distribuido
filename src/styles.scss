@@ -1,0 +1,852 @@
+html[data-theme='light'] {
+  --bg-primary:    #f6f6f7;
+  --bg-card:       #ffffff;
+  --bg-input:      #f0f2f5;
+  --bg-body:       #f0f2f5;
+  --text-main:     #12284a;
+  --text-muted:    #6c757d;
+  --text-soft:     #6c757d;
+  --border-color:  #dddddf;
+  --shadow-color:  rgba(0, 0, 0, 0.06);
+  --hover-overlay: rgba(0, 0, 0, 0.03);
+  --dropdown-hover: rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme='dark'] {
+  --bg-primary:    #0d1117;
+  --bg-card:       #161f30;
+  --bg-input:      #0d121f;
+  --bg-body:       #0d121f;
+  --text-main:     #e2e8f0;
+  --text-muted:    #8892a4;
+  --text-soft:     #8892a4;
+  --border-color:  #243048;
+  --shadow-color:  rgba(0, 0, 0, 0.25);
+  --hover-overlay: rgba(255, 255, 255, 0.02);
+  --dropdown-hover: rgba(255, 255, 255, 0.05);
+}
+
+/* Medidas de layout — não mudam com o tema, então ficam fora dos blocos acima. */
+:root {
+  /* Largura da barra e, por consequência, o quanto o conteúdo é empurrado
+     quando ela abre. Um número só para os dois lados não saírem de sincronia. */
+  --largura-sidebar: 300px;
+
+  /* Altura do header. No celular a barra abre por baixo dele e precisa saber
+     onde começar; repetir o número deixaria os dois fora de sincronia na
+     primeira vez que alguém mexesse no padding do header. */
+  --altura-header: 68px;
+
+  /* Recuo lateral de toda tela. Existe num lugar só de propósito: cada página
+     cravava o seu (32px, 34px, 2rem, p-4 do Bootstrap) por cima do recuo do
+     layout, e o conteúdo começava numa coluna diferente em cada rota — 32px na
+     matrícula, 56px na evasão, 66px nas configurações. Quem aplica é a caixa da
+     página (seção 3); nenhuma tela deve repetir padding lateral. */
+  --gutter-pagina: 32px;
+
+  /* Título de página — um tamanho para todas. Antes ia de 28px a 44px conforme
+     a tela, o que fazia o mesmo cabeçalho parecer de outro sistema. */
+  --titulo-pagina: clamp(26px, 2.6vw, 34px);
+}
+
+/* ==========================================================================
+   2. BASE GLOBAL
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
+}
+
+/* Nenhuma barra de rolagem à vista em lugar nenhum do sistema — a rolagem
+   continua funcionando por roda, toque e teclado.
+   Vale para qualquer elemento, não só a página: as áreas que rolam por conta
+   própria (lista de contatos do chat, tabelas em .table-responsive, modais)
+   mostrariam a sua. */
+* {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* Edge legado */
+}
+
+/* Chrome/Safari/Edge. Fica separado porque um navegador que não conheça o
+   pseudo-elemento descartaria a regra inteira se ele entrasse no bloco acima. */
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* ==========================================================================
+   3. LAYOUT PRINCIPAL
+   ========================================================================== */
+.app-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+  background-color: var(--bg-primary);
+
+  &.tela-autenticacao {
+    justify-content: center;
+    align-items: center;
+
+    .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+/* Sidebar global — todos os menus herdam isso */
+app-menu,
+app-menu-diretor,
+app-menu-professor,
+app-menu-admin,
+.sidebar {
+  width: var(--largura-sidebar) !important;
+  height: 100vh;
+  height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
+  box-sizing: border-box;
+  /* A lista rola quando não cabe. Esconder a barra é da regra global da seção 2;
+     aqui só o overflow-x, que precisa ser declarado: com apenas um dos eixos em
+     `auto`, o outro deixa de ser `visible` e vira `auto` sozinho — era daí que
+     saía a barra horizontal no rodapé da barra. */
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Abrir e fechar mora só nos hosts, nunca no .sidebar de dentro: ele é fixed e,
+   com o host transformado, passa a se posicionar por ele — repetir o translate
+   nos dois deslocaria a barra pelo dobro da largura.
+   visibility acompanha o transform porque só o transform a tiraria da vista
+   mas a deixaria focável: o Tab cairia numa lista de links invisível. */
+app-menu,
+app-menu-diretor,
+app-menu-professor,
+app-menu-admin {
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition: transform 0.28s ease, visibility 0.28s ease,
+    background-color 0.3s, border-color 0.3s;
+  will-change: transform;
+}
+
+.app-layout.menu-aberto app-menu,
+.app-layout.menu-aberto app-menu-diretor,
+.app-layout.menu-aberto app-menu-professor,
+.app-layout.menu-aberto app-menu-admin {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+/* Área de conteúdo. O recuo acompanha a barra: com ela aberta o conteúdo é
+   empurrado e reflui na largura que sobra; fechada, ocupa a tela inteira.
+   Quem liga os dois é a classe .menu-aberto no .app-layout. */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--bg-primary);
+  margin-left: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: margin-left 0.28s ease, width 0.28s ease, max-width 0.28s ease,
+    background-color 0.3s;
+}
+
+.app-layout.menu-aberto .main-content {
+  margin-left: var(--largura-sidebar);
+  width: calc(100% - var(--largura-sidebar));
+  max-width: calc(100% - var(--largura-sidebar));
+}
+
+/* A caixa da página: é ela que aplica o recuo de toda tela, uma vez só.
+   (.page-container-pushed saiu daqui junto com os wrappers que o usavam dentro
+   de componentes de rota — ali dentro ele somava um segundo recuo.) */
+.main-content > router-outlet + *,
+.main-content > ng-component,
+.main-content > div {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  padding: var(--gutter-pagina) !important;
+  margin-left: 0 !important;
+  /* Transparente de propósito: quem pinta o fundo é a .main-content, senão
+     estas caixas cobririam a marca d'água da logo. */
+  background-color: transparent;
+}
+
+/* A raiz de cada componente de página. São seis nomes porque as telas foram
+   escritas em épocas diferentes (.page-content, .page-container, .container-fluid
+   de uma, .dashboard-executivo de outra) — o que elas têm em comum é serem a
+   caixa que já está dentro do recuo do layout. Então aqui elas são niveladas:
+   sem padding lateral próprio, sem fundo opaco (que tapava a marca d'água em
+   umas telas e não em outras) e sem min-height: 100vh repetido dentro de um
+   container que já tem a altura toda — era isso que rendia rolagem sobrando. */
+.main-content .page-content,
+.main-content .page-container,
+.main-content .dashboard-executivo {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: transparent;
+  min-height: 0;
+}
+
+/* Cabeçalho de página: mesmo tamanho e mesmo espaçamento em todas as rotas. */
+.main-content .page-title,
+.main-content .settings-page-title {
+  font-size: var(--titulo-pagina);
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin: 0 0 6px;
+  overflow-wrap: break-word;
+}
+
+.main-content .page-heading,
+.main-content .settings-header {
+  margin-bottom: 28px;
+}
+
+.main-content .page-heading p,
+.main-content .settings-page-subtitle {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Marca d'água da logo — a logo saiu da sidebar e virou fundo do sistema.
+   Fica de propósito bem apagada: nas telas ela não deve competir com o
+   conteúdo, só marcar o fundo. */
+.main-content { position: relative; }
+
+.main-content > .marca-fundo {
+  position: fixed;      /* não rola junto com a página */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Conteúdo sempre acima da marca d'água. O header fica de fora: ele tem
+   position/z-index próprios e no mobile precisa passar por cima da sidebar
+   para os 3 riscos continuarem clicáveis com a barra aberta. */
+.main-content > *:not(.top-header):not(.marca-fundo) { position: relative; z-index: 1; }
+
+/* Header fixo */
+.top-header {
+  background-color: var(--bg-card);
+  padding: 16px 34px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+}
+
+/* ==========================================================================
+   3.1 A BARRA E OS 3 RISCOS
+   ========================================================================== */
+
+/* Os 3 riscos existem em qualquer largura: a barra é recolhível também no
+   desktop, e sem o botão não haveria como trazê-la de volta. */
+.btn-hamburguer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  margin-right: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    border-radius: 3px;
+    background: var(--nx-brand-deep, #5B21B6);
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+
+  &:hover { background: rgba(155, 47, 255, 0.08); }
+
+  /* Aberto: o risco do meio some e os outros dois viram um X. */
+  &.aberto {
+    span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    span:nth-child(2) { opacity: 0; }
+    span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .top-header {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  /* O header tem 4 coisas disputando ~360px: os 3 riscos, o título, o botão de
+     tema e o menu do usuário. Sem min-width: 0 o título se recusa a encolher e
+     empurra o menu do usuário para fora da tela — que o body corta com
+     overflow-x: hidden, ou seja, o conteúdo desaparece em vez de rolar. */
+  .top-header > div:first-child { min-width: 0; flex: 1 1 auto; }
+
+  .top-header h2 {
+    font-size: 1.05rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .top-header app-menu-usuario { flex-shrink: 0; }
+
+  /* Um token, um lugar: as caixas de página leem --gutter-pagina, então o recuo
+     do celular não precisa repetir a lista de seletores acima. */
+  :root { --gutter-pagina: 18px; }
+}
+
+/* ==========================================================================
+   3.2 CELULAR — a barra vira a tela de navegação inteira
+   ==========================================================================
+   Empurrar só funciona enquanto sobra largura útil para os dois lados. Num
+   S25 Ultra (384px) uma barra de 240px deixaria 144px de conteúdo: os títulos
+   ficam mais largos que os cards e vazam. Então aqui ela não empurra nada —
+   abre ocupando a tela toda e é a própria navegação. */
+@media (max-width: 767.98px) {
+  app-menu,
+  app-menu-diretor,
+  app-menu-professor,
+  app-menu-admin,
+  .sidebar {
+    width: 100% !important;
+    border-right: none;
+  }
+
+  /* O conteúdo nunca é espremido: ou a barra está aberta cobrindo a tela, ou
+     ele tem os 100% para si. */
+  .app-layout.menu-aberto .main-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* O header passa por cima da barra para o X continuar visível e fechável (o
+     z-index disso mora no app.scss, junto da regra base de .top-header), então
+     os links precisam começar abaixo dele.
+     O seletor é mais longo do que parece necessário de propósito: as três
+     sidebars declaram .sidebar-menu no próprio SCSS, e um estilo de componente
+     sai com [_ngcontent], o que empata com `.sidebar .sidebar-menu` e vence no
+     desempate por ordem. Com `.app-layout` na frente a global volta a ganhar. */
+  .app-layout .sidebar .sidebar-menu {
+    padding-top: calc(var(--altura-header) + 16px);
+  }
+
+  /* Barra aberta, o fundo para de rolar: sem isso o dedo que quer rolar a
+     lista de links rola a página atrás dela. Só aqui dentro, para uma janela
+     redimensionada para o desktop nunca herdar um body travado. */
+  body.menu-travado {
+    overflow: hidden;
+    /* iOS ignora overflow: hidden no body em alguns casos; a altura fixa
+       impede a rolagem elástica da página de trás. */
+    height: 100%;
+  }
+
+  /* O clamp do título (--titulo-pagina) já encolhe sozinho; o que falta no
+     celular é o h1 de telas que não usam .page-title. O caminho completo existe
+     para vencer estilo de componente: ele sai com [_ngcontent] e empataria com
+     um seletor de uma classe, ganhando no desempate por ordem. */
+  .app-layout .main-content h1 {
+    font-size: clamp(22px, 6.2vw, 28px);
+    line-height: 1.2;
+    /* Nome de disciplina ou aluno sem espaço não empurra a página para o lado. */
+    overflow-wrap: break-word;
+  }
+
+  /* O subtítulo abaixo do título vinha com .fs-5 (20px) e ficava quase do
+     tamanho do próprio título depois que ele encolheu. */
+  .app-layout .main-content .page-heading p {
+    font-size: 15px;
+  }
+}
+
+/* ==========================================================================
+   4. UTILITÁRIOS GLOBAIS DE COR
+   ========================================================================== */
+.text-soft   { color: var(--text-soft)  !important; }
+.text-main   { color: var(--text-main)  !important; }
+.text-muted  { color: var(--text-muted) !important; }
+
+.purple-text { color: #9b2fff !important; }
+.green-text  { color: #06d25e !important; }
+.blue-text   { color: #2196f3 !important; }
+.gold-text   { color: #ffd700 !important; }
+.orange-text { color: #f59e0b !important; }
+.red-text    { color: #ef4444 !important; }
+
+.green-gradient  { background: #15803D; }
+.blue-gradient   { background: #2E73F6; }
+.orange-gradient { background: var(--nx-accent, #0FA3C2); }
+.pink-gradient   { background: #DB2777; }
+
+.btn-gradient {
+  background: var(--nx-brand-deep, #5B21B6);
+  color: white; border: none; border-radius: 12px;
+  font-weight: 600; padding: 10px 20px; cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.9; color: white; }
+}
+
+/* ==========================================================================
+   5. COMPONENTES GLOBAIS COMPARTILHADOS
+   ========================================================================== */
+
+/* Cards genéricos */
+.card-custom, .content-card, .main-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+}
+
+/* Inputs e selects */
+input.form-control,
+.form-control-custom,
+.form-select-custom {
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 15px;
+  width: 100%;
+  transition: border-color 0.2s;
+
+  &:focus {
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    border-color: #9b2fff;
+    box-shadow: none;
+    outline: none;
+  }
+
+  &::placeholder { color: var(--text-muted); }
+
+  option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+  }
+}
+
+/* Search box */
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 8px 14px;
+  transition: border-color 0.2s;
+
+  :is(i, .ic) { color: var(--text-muted); margin-right: 10px; }
+
+  input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    width: 100%;
+    &:focus { outline: none; }
+    &::placeholder { color: var(--text-muted); }
+  }
+
+  &:focus-within { border-color: #9b2fff; }
+}
+
+/* Progress bars */
+.progress {
+  height: 6px;
+  background-color: var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-bar {
+  background: var(--nx-brand-deep, #5B21B6);
+  border-radius: 10px;
+}
+
+/* Metric card (compartilhado entre dashboards) */
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 20px;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+
+  .icon-square {
+    width: 45px; height: 45px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; color: white;
+    &.blue   { background: #1976D2; }
+    &.green  { background: #15803D; }
+    &.orange { background: #0E7490; }
+    &.purple { background: var(--nx-brand-deep, #5B21B6); }
+    &.red    { background: #DC2626; }
+  }
+}
+
+/* Imagem de perfil no header */
+.profile-image {
+  width: 50px; height: 50px;
+  border-radius: 50%; object-fit: cover;
+  border: 2px solid #9b2fff;
+}
+
+
+/* Modo foco (configuração do Aluno): tira a barra lateral e estreita a coluna
+   para leitura — mas o header FICA. Ele é a saída: o menu do usuário leva a
+   Perfil/Configurações e ao logout. Antes o header saía junto com a barra, e
+   quem ligava o modo foco dentro da própria tela de configurações perdia toda a
+   navegação de uma vez — sem nenhum jeito de voltar e desligar. */
+body.modo-foco-ativo {
+  /* Some o HOST, não só o <aside> de dentro. Quem é `position: fixed`, tem os
+     300px de largura, o z-index 1000 e o fundo pintado é o próprio elemento
+     app-menu* (ver "Sidebar global") — esconder apenas .sidebar deixava o host
+     no lugar como um painel cego, tampando os primeiros 300px de cada linha de
+     texto da tela. */
+  app-menu,
+  app-menu-diretor,
+  app-menu-professor,
+  app-menu-admin,
+  .sidebar { display: none; }
+
+  /* Os 3 riscos sem barra para abrir seriam um botão morto no header; a
+     navegação do modo foco é o menu do usuário. */
+  .btn-hamburguer { display: none; }
+
+  /* O !important cobre a regra de .app-layout.menu-aberto, que é mais
+     específica e continuaria empurrando o conteúdo para a direita atrás de uma
+     barra que não está mais lá. */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Coluna de leitura centralizada — o recuo continua sendo o do layout. */
+  .main-content > div {
+    max-width: 960px;
+    margin-inline: auto !important;
+  }
+
+  /* Menos ruído enquanto estuda. */
+  .main-content > .marca-fundo { display: none; }
+}
+
+.sem-animacoes {
+  *, *::before, *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
+
+/* Troca de tema atômica.
+   Cada caixa declara a sua própria transição de cor (0.2s aqui, 0.3s ali, e
+   várias sem nenhuma), então virar o data-theme fazia o tema entrar em ondas:
+   header primeiro, cards depois, bordas por último. Durante a troca as
+   transições são cortadas e tudo repinta no mesmo frame; a classe sai no frame
+   seguinte, devolvendo as transições ao hover e aos outros estados.
+   Quem põe e tira a classe é aplicarTema() (settings-store.ts). */
+html.trocando-tema,
+html.trocando-tema *,
+html.trocando-tema *::before,
+html.trocando-tema *::after {
+  transition: none !important;
+}
+
+/* Acessibilidade (configurações do Aluno) */
+html.fonte-ampliada { font-size: 112.5%; }
+
+html.alto-contraste {
+  --text-muted: var(--text-main);
+  --border-color: #8a8a9a;
+}
+
+/* Modal de detalhes (Ver Detalhes) — reutilizado por Evasão, Matrículas, Avaliações */
+.detalhe-overlay {
+  position: fixed; inset: 0; z-index: 1050;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.detalhe-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  width: 100%; max-width: 560px;
+  max-height: 90vh; overflow-y: auto;
+  padding: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+.detalhe-modal h3 { color: var(--text-main); font-weight: 800; margin: 0; }
+.detalhe-close {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 22px; cursor: pointer; line-height: 1;
+  &:hover { color: var(--text-main); }
+}
+.detalhe-row {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 11px 0; border-bottom: 1px solid var(--border-color);
+  &:last-child { border-bottom: none; }
+  .rot { color: var(--text-muted); font-size: 14px; }
+  .val { color: var(--text-main); font-weight: 600; font-size: 14px; text-align: right; }
+}
+
+/* As regras de .brand-logo saíram junto com as <img> das sidebars e do login.
+   A logo agora é o <app-logo-nexo>: marca d'água .marca-fundo (seção 3), header e a
+   logo grande da tela de login (login.scss). */
+
+/* ==========================================================================
+   6. TELAS ADMINISTRATIVAS (contas, catálogo, inscrições)
+   ==========================================================================
+   Padrões compartilhados que antes viviam copiados por página. Global (e não
+   partial por componente) pelo mesmo motivo do modal de detalhes acima: uma
+   página que redefine .stat-card no próprio SCSS continua ganhando — o estilo
+   de componente sai com [_ngcontent] e vence o global no desempate. */
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 20px;
+  height: 100%; /* cards da mesma linha alinham mesmo com rótulos de 1 ou 2 linhas */
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+
+  h2 { font-size: clamp(24px, 2.2vw, 32px); }
+}
+
+.icon-box {
+  width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: white;
+  &.blue-gradient   { background: #1976D2; }
+  &.green           { background: #15803D; }
+  &.orange          { background: #0E7490; }
+  &.purple-gradient { background: var(--nx-brand-deep, #5B21B6); }
+}
+
+.search-box {
+  display: flex; align-items: center; padding: 10px 14px;
+  background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 14px;
+  transition: border-color 0.2s;
+  &:focus-within { border-color: #9b2fff; }
+  :is(i, .ic)     { color: var(--text-muted); margin-right: 8px; }
+  input { background: transparent; border: none; color: var(--text-main); width: 100%;
+    &::placeholder { color: var(--text-muted); }
+    &:focus { outline: none; }
+  }
+}
+
+.filter-select {
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 10px 14px; color: var(--text-main);
+  font-size: 14px; width: 100%;
+  option { background: var(--bg-card); color: var(--text-main); }
+}
+
+.btn-dark-custom {
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  color: var(--text-main); border-radius: 12px; padding: 10px 20px;
+  font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.gradient-btn {
+  background: var(--nx-brand-deep, #5B21B6);
+  color: white; border: none; border-radius: 10px;
+  font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+  &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.quick-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  height: 100%;
+  transition: transform 0.2s, border-color 0.2s;
+  &:hover { transform: translateY(-2px); border-color: #9b2fff; }
+}
+
+.student-row-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px; transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+  &.alert-border { border-color: rgba(239, 68, 68, 0.4); }
+}
+
+.avatar-placeholder-circle {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--nx-brand-deep, #5B21B6);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+
+/* A barra de progresso precisa de uma largura própria dentro do flex-wrap:
+   sem base ela encolhia a zero espremida pelos vizinhos. */
+.doc-progress-block { flex: 1 1 200px; min-width: 160px; max-width: 260px; }
+
+.badge-compliance {
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 8px;
+  display: flex; align-items: center; gap: 4px;
+  &.status-ok     { background: rgba(6,210,94,0.1);   color: #06d25e; }
+  &.status-warn   { background: rgba(255,193,7,0.1);  color: #ffc107; }
+  &.status-danger { background: rgba(239,68,68,0.1);  color: #ef4444; }
+}
+
+/* Separa os dados do item das ações no modal de detalhes */
+.detalhe-separador { border-color: var(--border-color); opacity: 1; margin: 16px 0 14px; }
+
+/* Abaixo de 768px a linha vira pilha: cada bloco ocupa a largura toda em vez
+   de disputar os ~360px, e os botões crescem para dedo. */
+@media (max-width: 767.98px) {
+  .student-row-card {
+    .info-principal     { flex: 1 1 100%; }
+    .status-badges      { flex: 1 1 100%; flex-wrap: wrap; }
+    .doc-progress-block { flex: 1 1 100%; max-width: none; }
+    .acoes-item         { flex: 1 1 100%; align-items: stretch !important;
+      .gradient-btn, .btn-dark-custom { width: 100%; }
+    }
+  }
+
+  .stat-card { padding: 16px; }
+}
+/* ==========================================================================
+   9. CELULAR — acabamento de toque
+   ==========================================================================
+   Nada aqui muda o desktop: tudo que depende de dedo fica atrás de
+   (pointer: coarse) ou de max-width, e o que é global só tira atrito
+   (flash de toque, zoom de duplo toque, texto que o iOS reescala). */
+html {
+  /* O iOS aumenta o texto ao girar a tela; o layout já é fluido e não precisa. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  /* Rolar a lista de uma gaveta/modal não puxa a página atrás junto. */
+  overscroll-behavior-y: none;
+}
+
+/* Sem o atraso e o zoom de duplo toque nos controles: tocar duas vezes num
+   botão (ex.: "Responder" duas vezes seguidas) virava zoom da página. */
+button, a, select, label, summary, [role="button"], input:not([type="text"]):not([type="password"]):not([type="search"]):not([type="email"]) {
+  touch-action: manipulation;
+}
+
+/* Telas com notch/barra de gestos (precisa de viewport-fit=cover no index).
+   O padding do header mora no app.scss, junto da regra base dele. */
+.main-content {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* A gaveta de navegação cobre a tela toda: a lista rola por dentro e o último
+   link não pode ficar sob a barra de gestos do iPhone. */
+.app-layout .sidebar .sidebar-menu {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767.98px) {
+  /* iOS dá zoom na página ao focar campo com fonte menor que 16px — e não
+     desfaz sozinho. !important porque os campos têm 14px em CSS de componente. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Tabela que rola na horizontal: o campo dentro da célula tem width: 100%, e
+     percentual não conta para a largura mínima da coluna — então a tabela
+     espremia as colunas de nota até sobrar uma tira de ~15px onde não dá para
+     digitar. O min-width devolve ao campo um tamanho de uso; quem sobra rola. */
+  .table-responsive .form-control,
+  .table-responsive .form-select,
+  .table-responsive select,
+  .table-responsive-custom .form-control,
+  .table-responsive-custom select {
+    min-width: 72px;
+  }
+
+  /* Rolagem horizontal com inércia no iOS, sem "puxar" a página ao chegar no fim. */
+  .table-responsive,
+  .table-responsive-custom {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+}
+
+@media (pointer: coarse) {
+  /* Alvo mínimo de toque de 44px (Apple HIG / WCAG 2.5.5) nos controles que a
+     auditoria achou com 26–39px: abas, filtros, selects, botões de ação. */
+  button:not(.btn-close):not(.btn-hamburguer):not(.seta),
+  .btn,
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
+    min-height: 44px;
+  }
+
+  /* Setinhas e ícones soltos: a área de toque cresce sem o desenho crescer. */
+  .btn-hamburguer, .seta, .btn-presence {
+    position: relative;
+  }
+  .btn-hamburguer::after, .seta::after, .btn-presence::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+
+  /* O 'Mostrar senha' e as chaves eram clicáveis só no quadradinho. */
+  .form-check-input { width: 1.4em; height: 1.4em; }
+}

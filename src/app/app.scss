@@ -1,0 +1,103 @@
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--bg-primary);
+  box-sizing: border-box;
+
+  &.tela-autenticacao {
+    justify-content: center;
+    align-items: center;
+
+    .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+/* margin-left/width por perfil ficam só no styles.scss global: lá a mesma
+   regra tem um @media que zera o recuo no mobile. Repetir os valores aqui
+   criava uma regra com [_ngcontent] (mais específica que a global) que
+   nunca perdia pro @media — o conteúdo ficava com 300px de recuo cravado
+   mesmo com a sidebar escondida fora da tela. */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  transition: margin-left 0.3s ease, width 0.3s ease, background-color 0.3s;
+}
+
+.top-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  /* env(): notch e barra de gestos (viewport-fit=cover no index.html). Sem notch vale 0. */
+  padding: calc(12px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) 12px max(24px, env(safe-area-inset-left, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* No celular a barra abre cobrindo a tela inteira (styles.scss, seção 3.2) e o
+   z-index dela é 1000. O header precisa passar por cima, senão a barra cobre o
+   próprio X que a fecha e não sobra jeito de sair dela.
+   Fica aqui, e não no styles.scss, porque a regra base de .top-header é deste
+   arquivo: como estilo de componente ela sai com [_ngcontent] e venceria a
+   global de mesmo nome. */
+@media (max-width: 767.98px) {
+  .top-header {
+    z-index: 1001;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+}
+
+.container-fluid {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Botão de saída do modo foco no header (só aparece com o modo ligado) */
+.btn-sair-foco {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: border-color 0.2s;
+  &:hover { border-color: #9b2fff; }
+}
+
+/* No celular o header já disputa espaço: fica só o ícone. */
+@media (max-width: 575.98px) {
+  .rotulo-sair-foco { display: none; }
+  .btn-sair-foco { padding: 6px 10px; }
+}

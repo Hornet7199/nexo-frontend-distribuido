@@ -1,0 +1,21 @@
+# Sobe o front (ng serve) em http://localhost:4200.
+#
+#   docker compose up --build
+#
+# Os 4 backends precisam estar no ar no host (8081 usuario, 8082 pedagogico, 8083 comunicacao,
+# 8084 gamificacao). De dentro do container o host é host.docker.internal; o proxy do ng serve
+# (proxy.conf.js) lê isso de BACKEND_HOST.
+name: nexo-frontend
+
+services:
+  frontend:
+    build: .
+    image: nexo-frontend:local
+    container_name: nexo-frontend
+    ports:
+      - "4200:4200"
+    environment:
+      BACKEND_HOST: host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

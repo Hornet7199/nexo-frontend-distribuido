@@ -1,0 +1,194 @@
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3. */
+
+/* Abas — mesmo padrão da tela de Avaliações */
+.tabs-container {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  flex-wrap: wrap;
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: var(--nx-radius-card, 14px);
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover { color: var(--text-main); }
+
+    &.active {
+      background: #06d25e;
+      color: #ffffff;
+    }
+  }
+}
+
+.cadastro-form {
+  max-width: 900px;
+}
+
+.cadastro-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.form-control,
+.form-select {
+  height: 45px;
+  font-size: 14px;
+  border-radius: 10px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: border-color 0.2s;
+
+  &::placeholder { color: var(--text-muted); }
+
+  &:focus {
+    box-shadow: none;
+    border-color: var(--nx-brand, #6D28D9);
+    background-color: var(--bg-input);
+    color: var(--text-main);
+  }
+}
+
+.form-select option {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+}
+
+/* Seleção múltipla de matérias */
+.materias-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background-color: var(--bg-input);
+
+  &.invalido { border-color: #dc3545; }
+}
+
+.materia-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--nx-radius-card, 14px);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover { color: var(--text-main); }
+
+  &.selecionada {
+    background: #06d25e;
+    border-color: #06d25e;
+    color: #ffffff;
+  }
+}
+
+.erro-materias {
+  font-size: 12px;
+  color: #ff7b7b;
+  margin-top: 6px;
+}
+
+/* Botão */
+.btn-cadastro {
+  background: var(--nx-brand-deep, #5B21B6);
+  border: none;
+  color: white;
+  font-weight: 600;
+  height: 45px;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.9; color: white; }
+}
+
+/* Feedback */
+.invalid-feedback { color: #ff7b7b; }
+
+.form-control.is-invalid,
+.form-select.is-invalid { border-color: #dc3545; }
+
+.alert { display: block; }
+
+/* Nota que explica por que o formulário do aluno é tão curto. Ela precisa ser
+   lida como informação, e não como aviso de erro — daí o tom neutro. */
+.nota-privacidade {
+  display: flex; align-items: center; gap: 8px;
+  margin: 4px 0 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  :is(i, .ic) { color: #06d25e; font-size: 15px; }
+}
+
+.form-text { color: var(--text-muted); font-size: 12px; }
+
+/* Botão de copiar as credenciais recém-geradas */
+.btn-copiar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+  &:hover { border-color: var(--nx-brand, #6D28D9); color: var(--text-main); }
+  .ic { color: #06d25e; }
+}
+
+/* Contador de matérias do professor (teto de 3, igual ao servidor) */
+.contador-materias {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 2px 10px;
+  &.no-limite { color: var(--nx-accent, #0FA3C2); border-color: color-mix(in srgb, var(--nx-accent, #0FA3C2) 40%, transparent); }
+}
+
+.materia-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  &:hover { border-color: var(--border-color); }
+}
+
+/* Botão primário do redesign: marca profunda, texto branco, hover mais escuro */
+.btn-cadastro {
+  min-height: 44px;
+  color: #FFFFFF;
+  border-radius: var(--nx-radius-control, 10px);
+  opacity: 1;
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
+  }
+}

@@ -1,0 +1,80 @@
+<div class="app-layout"
+     [class.tela-autenticacao]="!authService.usuarioLogado()"
+     [class.menu-aberto]="menuAberto()">
+
+    @if (authService.usuarioLogado(); as usuario) {
+      @if (usuario.role === 'aluno') {
+        <app-menu></app-menu>
+      } @else if (usuario.role === 'professor') {
+        <app-menu-professor></app-menu-professor>
+      } @else if (usuario.role === 'admin') {
+        <app-menu-admin></app-menu-admin>
+      } @else {
+        <app-menu-diretor></app-menu-diretor>
+      }
+    }
+
+    <main class="main-content"
+        [class.content-aluno]="authService.usuarioLogado()?.role === 'aluno'"
+        [class.content-diretor]="authService.usuarioLogado()?.role === 'diretor'"
+        [class.content-professor]="authService.usuarioLogado()?.role === 'professor'">
+
+        <!-- Marca d'água de fundo. No login quem manda é a logo grande do
+             login.scss — duas marcas sobrepostas ficariam sujas. -->
+        @if (authService.usuarioLogado()) {
+            <app-logo-nexo class="marca-fundo" largura="min(560px, 58vw)" aria-hidden="true" />
+        }
+
+        @if (authService.usuarioLogado(); as usuario) {
+        <header class="top-header">
+            <div class="d-flex align-items-center">
+                <!-- Os 3 riscos: abrem e fecham a navbar, em qualquer largura. -->
+                <button type="button"
+                        class="btn-hamburguer"
+                        [class.aberto]="menuAberto()"
+                        [attr.aria-expanded]="menuAberto()"
+                        aria-controls="sidebar-principal"
+                        [attr.aria-label]="menuAberto() ? 'Fechar menu' : 'Abrir menu'"
+                        (click)="alternarMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <h2 class="h4 fw-bold mb-0" style="color: var(--text-main);">
+                    @if (usuario.role === 'aluno') { Portal do Aluno }
+                    @else if (usuario.role === 'professor') { Portal do Professor }
+                    @else if (usuario.role === 'admin') { Portal do Administrador }
+                    @else { Portal do Diretor }
+                </h2>
+
+                <!-- Logo v2 em lockup (3,33:1): a largura cresceu para manter a altura
+                     de antes (28 a 41px). A troca de tema mora no menu do usuário. -->
+                <app-logo-nexo class="logo-header ms-3" largura="clamp(94px, 17vw, 136px)" />
+
+                <!-- Saída do modo foco. Sem ela, desligar exigia lembrar que a chave
+                     está em Configurações → Estudos — com a barra lateral escondida,
+                     que é justamente o que o modo foco faz. -->
+                @if (modoFoco()) {
+                    <button type="button" class="btn-sair-foco ms-2" (click)="sairDoModoFoco()">
+                        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg>
+                        <span class="rotulo-sair-foco">Sair do modo foco</span>
+                    </button>
+                }
+            </div>
+
+            <app-menu-usuario
+                [userName]="usuario.nome"
+                [userClass]="usuario.cargo"
+                [userPhoto]="usuario.foto"
+                [temaEscuro]="temaEscuro()"
+                (alternarTema)="alternarTema()">
+            </app-menu-usuario>
+        </header>
+        }
+
+        <div class="container-fluid p-4">
+            <router-outlet></router-outlet>
+        </div>
+    </main>
+</div>

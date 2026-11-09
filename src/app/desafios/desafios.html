@@ -1,0 +1,104 @@
+<div class="page-container">
+  <header class="dashboard-header mb-4">
+    <h1 class="page-title fw-bold">Desafios</h1>
+    <p class="text-soft m-0">Complete desafios e ganhe XP para subir no ranking</p>
+  </header>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-4" *ngFor="let stat of stats()">
+      <div class="metric-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-soft small mb-1">{{stat.label}}</p>
+            <h2 class="fw-bold mb-0 text-main">{{stat.value}}</h2>
+          </div>
+          <div class="icon-square" [ngClass]="stat.color">
+            @switch (stat.icon) {
+              @case ('bi-bullseye') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-target"></use></svg> }
+              @case ('bi-fire') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-flame"></use></svg> }
+              @case ('bi-trophy') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trophy"></use></svg> }
+              @default { <i [class]="'bi ' + stat.icon"></i> }
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-card p-3 mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-lg-6">
+        <div class="search-box">
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+          <input type="text" class="form-control-custom" placeholder="Buscar por título..."
+                 aria-label="Buscar desafio por título"
+                 [ngModel]="buscaDeTermos()" (ngModelChange)="buscaDeTermos.set($event)">
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <select class="form-select-custom" aria-label="Filtrar por matéria"
+                [ngModel]="materiaSelecionada()" (ngModelChange)="materiaSelecionada.set($event)">
+          <option *ngFor="let m of materias()" [value]="m">{{m}}</option>
+        </select>
+      </div>
+      <div class="col-lg-3">
+        <select class="form-select-custom" aria-label="Filtrar por nível"
+                [ngModel]="nivelSelecionado()" (ngModelChange)="nivelSelecionado.set($event)">
+          <option *ngFor="let n of niveis" [value]="n">{{n}}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Onde o aluno parou é o corte mais usado, então vira botão e não select. -->
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      @for (op of statusOpcoes; track op.valor) {
+        <button type="button" class="status-aba"
+                [class.ativa]="statusSelecionado() === op.valor"
+                (click)="statusSelecionado.set(op.valor)">
+          {{ op.rotulo }}
+        </button>
+      }
+      @if (temFiltro()) {
+        <button type="button" class="status-aba limpar" (click)="limparFiltros()">
+          <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-x"></use></svg> Limpar
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (!carregando() && desafiosFiltrados().length === 0) {
+    <div class="main-card p-4 text-center mb-4">
+      <svg class="ic fs-3 text-soft" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+      <p class="text-soft mt-2 mb-0">
+        {{ temFiltro() ? 'Nenhum desafio encontrado com esses filtros.' : 'Nenhum desafio disponível para a sua etapa ainda.' }}
+      </p>
+    </div>
+  }
+
+  <div class="row g-4">
+    <div class="col-md-6 col-xl-4" *ngFor="let desafio of desafiosFiltrados()">
+      <div class="main-card p-4 h-100 d-flex flex-column" [class.active-border]="desafio.status === 'progresso'">
+        <div class="d-flex justify-content-between mb-3">
+          <span class="level-tag" [ngClass]="desafio.nivelClasse">{{desafio.nivel}}</span>
+          <span *ngIf="desafio.status === 'concluido'" class="status-badge success">Concluído</span>
+        </div>
+        <h3 class="h5 text-main fw-bold mb-1">{{desafio.titulo}}</h3>
+        <p class="text-soft small mb-3">{{desafio.materia}}</p>
+        <div class="d-flex gap-3 mb-4 mt-auto">
+          <span class="text-soft small"><svg class="ic text-warning" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg> {{desafio.xp}} XP</span>
+          <span class="text-soft small"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> {{desafio.tempo}}</span>
+        </div>
+        <div class="progress mb-3" *ngIf="desafio.status === 'progresso'">
+          <div class="progress-bar" [style.width]="desafio.progresso + '%'"></div>
+        </div>
+        <button class="btn btn-outline-main w-100 mt-2" [class.btn-gradient]="desafio.status !== 'concluido'"
+                (click)="acao(desafio)">
+          {{ rotuloBotao(desafio) }}
+        </button>
+      </div>
+    </div>
+    <div class="col-12" *ngIf="!carregando() && desafiosFiltrados().length === 0">
+      <p class="text-soft">Nenhum desafio encontrado.</p>
+    </div>
+  </div>
+</div>

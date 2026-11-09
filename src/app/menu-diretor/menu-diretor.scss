@@ -1,0 +1,38 @@
+.sidebar {
+  width: 300px; min-width: 300px; height: 100vh; height: 100dvh;
+  position: fixed; top: 0; left: 0; z-index: 1000;
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
+  display: flex; flex-direction: column; justify-content: space-between;
+  box-sizing: border-box; overflow-y: auto;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* A logo saiu daqui e virou fundo do sistema (styles.scss) */
+.sidebar-menu { padding: 28px 14px 16px; flex-grow: 1; }
+.sidebar-list { list-style: none; margin: 0; padding: 0; li { margin-bottom: 6px; } }
+
+.sidebar-link {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 22px; border-radius: 20px;
+  color: var(--text-main); font-size: 16px; font-weight: 600;
+  text-decoration: none; transition: background 0.2s; cursor: pointer;
+
+  :is(i, .ic) { font-size: 20px; color: var(--text-muted); transition: color 0.2s; background: none; -webkit-text-fill-color: unset; }
+
+  &:hover { background: rgba(155, 47, 255, 0.08); :is(i, .ic) { color: #9b2fff; } }
+
+  &.active {
+    background: var(--nx-brand-deep, #5B21B6);
+    color: #fff !important;
+    box-shadow: 0 8px 24px rgba(102, 65, 190, 0.25);
+    :is(i, .ic) { color: #fff !important; -webkit-text-fill-color: #fff; background: none; }
+  }
+}
+
+.sidebar-footer {
+  padding: 8px 20px; border-top: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: flex-start; gap: 12px;
+  p { margin: 0; font-size: 13px; color: var(--text-muted); }
+}
+

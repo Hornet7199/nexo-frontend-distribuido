@@ -1,0 +1,186 @@
+<section class="page-content">
+
+    <div class="page-heading mb-4">
+        <h1 class="page-title fw-bold">Gestão de Evasão</h1>
+        <p class="text-soft fs-5">Monitoramento e intervenção para retenção de alunos</p>
+    </div>
+
+    <section class="stats-section mb-4">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator red-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Total em Risco</p>
+                        <h2>{{ totalEmRisco() }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator red-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Risco Alto</p>
+                        <h2>{{ totalAlto() }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator yellow-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Risco Médio</p>
+                        <h2>{{ totalMedio() }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card shadow-sm border-bottom-indicator green-indicator">
+                    <div>
+                        <p class="text-soft mb-1">Risco Baixo</p>
+                        <h2>{{ totalBaixo() }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="filters-box p-4 rounded-4 shadow-sm mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-5">
+                <div class="search-box d-flex align-items-center p-2">
+                    <svg class="ic px-2 text-secondary" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+                    <input type="text" [ngModel]="buscaNome()" (ngModelChange)="buscaNome.set($event)"
+                        class="form-control border-0 bg-transparent shadow-none"
+                        placeholder="Buscar por nome, matrícula ou turma...">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-select filter-select" [ngModel]="riscoSelecionado()"
+                    (ngModelChange)="riscoSelecionado.set($event)">
+                    <option *ngFor="let r of riscos" [value]="r">{{ r }}</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-select filter-select" [ngModel]="turmaSelecionada()"
+                    (ngModelChange)="turmaSelecionada.set($event)">
+                    <option *ngFor="let t of turmas()" [value]="t">{{ t }}</option>
+                </select>
+            </div>
+            <div class="col-lg-1">
+                <button class="btn gradient-btn w-100 d-flex align-items-center justify-content-center gap-1">
+                    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-filter"></use></svg> Filtrar
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- flex-wrap + gap: sem espaço para os dois lado a lado, o botão desce para
+         a linha de baixo inteiro em vez de ser espremido até o rótulo quebrar. -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <h2 class="fs-4 fw-bold text-white mb-0">Alunos em Risco ({{ alunosFiltrados().length }})</h2>
+        <button class="btn btn-export shadow-sm" (click)="exportar()">Exportar Relatório</button>
+    </div>
+
+    @if (carregando()) {
+        <p class="text-soft">Carregando alunos…</p>
+    } @else if (erro()) {
+        <div class="d-flex align-items-center gap-3">
+            <p class="text-soft mb-0">Não foi possível carregar os dados de evasão.</p>
+            <button class="btn gradient-btn" (click)="carregar()">Tentar novamente</button>
+        </div>
+    } @else {
+
+    <section class="students-section d-flex flex-column gap-3 mb-5">
+        <div class="student-card p-4 rounded-4 shadow-sm" *ngFor="let aluno of alunosFiltrados()">
+
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                <div class="d-flex gap-3 align-items-center">
+                    <div class="avatar-container position-relative">
+                        <img loading="lazy" decoding="async" [src]="aluno.foto" [alt]="aluno.nome" class="rounded-circle student-avatar">
+                        <span class="status-badge-icon position-absolute" [ngClass]="getClasseRisco(aluno.risco)">
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="fs-5 text-white fw-bold mb-1">{{ aluno.nome }}</h3>
+                        <p class="text-soft mb-0 fs-6">{{ aluno.turma }} • <span class="text-secondary">Mat: {{ aluno.matricula }}</span></p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-4 metrics-container align-items-center text-center">
+                    <div>
+                        <p class="text-soft mb-1 small">Frequência</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="width: 60px;">
+                                <div class="progress-bar bg-purple" [style.width]="aluno.frequencia + '%'"></div>
+                            </div>
+                            <span class="text-white fw-bold small">{{ aluno.frequencia }}%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-soft mb-1 small">Participação</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="width: 60px;">
+                                <div class="progress-bar bg-purple" [style.width]="aluno.participacao + '%'"></div>
+                            </div>
+                            <span class="text-white fw-bold small">{{ aluno.participacao }}%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-soft mb-1 small">Nota Média</p>
+                        <span class="fs-5 text-white fw-bold">{{ aluno.notaMedia }}</span>
+                    </div>
+                    <div>
+                        <p class="text-soft mb-1 small">Último Acesso</p>
+                        <span class="text-white small d-block fw-bold">{{ aluno.ultimoAcesso }}</span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2 action-buttons">
+                    <button class="btn btn-dark-custom w-100 text-white text-center" (click)="verDetalhes(aluno)">
+                        Ver Detalhes
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-secondary opacity-25 my-4">
+
+            <div class="row g-3 text-start">
+                <div class="col-md-6">
+                    <p class="text-soft mb-1 small">Motivo Principal</p>
+                    <p class="text-white fw-semibold mb-0">{{ aluno.motivoPrincipal }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="text-soft mb-1 small">Intervenções Realizadas</p>
+                    <p class="text-white fw-semibold mb-0">{{ aluno.intervencoes }}</p>
+                    <small class="text-soft text-secondary block dynamic-small">{{ aluno.tempoIntervencao }}</small>
+                </div>
+            </div>
+
+        </div>
+
+        @if (alunosFiltrados().length === 0) {
+            <p class="text-soft">Nenhum aluno encontrado com os filtros atuais.</p>
+        }
+    </section>
+
+    }
+
+    @if (detalhe(); as a) {
+      <div class="detalhe-overlay" (click)="fecharDetalhes()">
+        <div class="detalhe-modal" (click)="$event.stopPropagation()">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h3>{{ a.nome }}</h3>
+            <button class="detalhe-close" (click)="fecharDetalhes()">&times;</button>
+          </div>
+          <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ a.turma }}</span></div>
+          <div class="detalhe-row"><span class="rot">Matrícula</span><span class="val">{{ a.matricula }}</span></div>
+          <div class="detalhe-row"><span class="rot">Nível de risco</span><span class="val">{{ a.risco }}</span></div>
+          <div class="detalhe-row"><span class="rot">Motivo principal</span><span class="val">{{ a.motivoPrincipal }}</span></div>
+          <div class="detalhe-row"><span class="rot">Frequência</span><span class="val">{{ a.frequencia }}%</span></div>
+          <div class="detalhe-row"><span class="rot">Participação</span><span class="val">{{ a.participacao }}%</span></div>
+          <div class="detalhe-row"><span class="rot">Nota média</span><span class="val">{{ a.notaMedia }}</span></div>
+          <div class="detalhe-row"><span class="rot">Último acesso</span><span class="val">{{ a.ultimoAcesso }}</span></div>
+          <div class="detalhe-row"><span class="rot">Intervenções</span><span class="val">{{ a.intervencoes }} ({{ a.tempoIntervencao }})</span></div>
+        </div>
+      </div>
+    }
+</section>

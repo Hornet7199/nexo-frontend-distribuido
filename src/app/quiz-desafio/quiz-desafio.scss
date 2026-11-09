@@ -1,0 +1,115 @@
+/* quiz-desafio.scss — usa apenas variáveis do styles.scss */
+
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3. */
+
+.back-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+  &:hover { color: var(--nx-brand, #6D28D9); }
+}
+
+.main-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--nx-radius-card, 14px);
+}
+
+.text-main { color: var(--text-main) !important; }
+.text-soft { color: var(--text-muted) !important; }
+
+.level-tag {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 8px;
+  &.facil   { background: rgba(6, 210, 94, 0.1);  color: #06d25e; }
+  &.medio   { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+  &.dificil { background: rgba(255, 61, 0, 0.1);  color: #ff3d00; }
+}
+
+/* Gabaritou */
+.banner-sucesso { border-color: #06d25e; }
+.icone-sucesso { color: #06d25e; }
+
+/* Errou — âmbar, não vermelho: é um convite a refazer, não um veredito */
+.banner-retentar { border-color: #ffc107; }
+.icone-retentar { color: #ffc107; }
+
+/* Alternativas — mesmo padrão de "chip" selecionável do cadastro de professor */
+.alternativas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alternativa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) { border-color: var(--nx-brand, #6D28D9); }
+  &:disabled { cursor: default; }
+
+  &.selecionada {
+    border-color: var(--nx-brand, #6D28D9);
+    background: color-mix(in srgb, var(--nx-brand, #6D28D9) 8%, transparent);
+  }
+
+  /* Só aparece em modo revisão, e modo revisão só existe para quem gabaritou —
+     por isso não há mais estado "incorreta": nada é marcado em vermelho. */
+  &.correta {
+    border-color: #06d25e;
+    background: rgba(6, 210, 94, 0.08);
+    color: #06d25e;
+  }
+}
+
+.btn-outline-main {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main); border-radius: 12px;
+  padding: 10px 20px; font-weight: 600;
+  transition: all 0.2s; cursor: pointer;
+  &:hover { border-color: var(--nx-brand, #6D28D9); color: var(--nx-brand, #6D28D9); }
+}
+
+.btn-gradient {
+  background: var(--nx-brand-deep, #5B21B6);
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 24px;
+  transition: opacity 0.2s;
+  &:hover:not(:disabled) { opacity: 0.9; color: white; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.enunciado {
+  white-space: pre-line;
+}
+
+/* Botão primário do redesign: marca profunda, texto branco, hover mais escuro */
+.btn-gradient {
+  min-height: 44px;
+  color: #FFFFFF;
+  border-radius: var(--nx-radius-control, 10px);
+  opacity: 1;
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
+  }
+}
+
+/* XP é ciano (claro #0FA3C2, escuro #5EE0F2) */
+.ic.text-warning { color: var(--nx-accent, #0FA3C2) !important; }
+.xp-ganho { color: var(--nx-accent, #0FA3C2) !important; font-weight: 700; }

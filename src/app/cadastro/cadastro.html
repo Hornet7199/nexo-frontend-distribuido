@@ -1,0 +1,146 @@
+<div class="page-content">
+
+  <!-- ── Cabeçalho ─────────────────────────────────────── -->
+  <header class="mb-4">
+    <h1 class="fw-bold m-0" style="color: var(--text-main);">Cadastros</h1>
+    <p class="mb-0" style="color: var(--text-muted);">
+      Registro de alunos e professores — o acesso ao sistema é gerado automaticamente
+    </p>
+  </header>
+
+  <!-- ── Abas ─────────────────────────────────────────── -->
+  <div class="tabs-container mb-4">
+    <button class="tab-btn" [class.active]="abaAtiva() === 'aluno'" (click)="setAba('aluno')">Aluno</button>
+    <button class="tab-btn" [class.active]="abaAtiva() === 'professor'" (click)="setAba('professor')">Professor</button>
+  </div>
+
+  <!-- ── Feedback ─────────────────────────────────────── -->
+  <div *ngIf="mensagemSucesso()" class="alert alert-success">{{ mensagemSucesso() }}</div>
+  <div *ngIf="mensagemErro()" class="alert alert-danger">{{ mensagemErro() }}</div>
+
+  <div *ngIf="acesso() as a" class="alert alert-info d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <svg class="ic fs-4" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-key"></use></svg>
+    <div class="flex-grow-1">
+      <strong>Acesso gerado com sucesso!</strong><br>
+      <small>
+        Login: <strong>{{ a.login }}</strong>
+        &nbsp;|&nbsp;
+        Senha provisória: <strong>{{ a.senha }}</strong>
+        <span class="d-block">A senha aparece só esta vez — copie e repasse agora.</span>
+      </small>
+    </div>
+    <button type="button" class="btn btn-sm btn-copiar" (click)="copiarAcesso()">
+      @if (copiado()) {
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> Copiado!
+      } @else {
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg> Copiar acesso
+      }
+    </button>
+  </div>
+
+  <!-- ── Aluno ────────────────────────────────────────── -->
+  <form *ngIf="abaAtiva() === 'aluno'" class="cadastro-form main-card p-4"
+        [formGroup]="alunoForm" (ngSubmit)="cadastrarAluno()" novalidate>
+
+    <h2 class="cadastro-title">Cadastrar Aluno</h2>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label" for="aluno-nome">Nome do aluno:</label>
+        <input type="text" id="aluno-nome" formControlName="nome" class="form-control"
+               [class.is-invalid]="fa['nome'].invalid && fa['nome'].touched"
+               placeholder="Digite o nome completo">
+        <div class="invalid-feedback">Nome obrigatório (mínimo 3 caracteres).</div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label" for="aluno-turma">Turma:</label>
+        <select id="aluno-turma" formControlName="turmaId" class="form-select"
+                [class.is-invalid]="fa['turmaId'].invalid && fa['turmaId'].touched">
+          <option [ngValue]="null" disabled>Selecione a turma</option>
+          <option *ngFor="let t of turmas()" [ngValue]="t.id">{{ t.nome }}</option>
+        </select>
+        <div class="invalid-feedback">Selecione a turma.</div>
+        <small class="form-text">É dela que sai o conteúdo que o aluno vai estudar.</small>
+      </div>
+    </div>
+
+    <!-- Nascimento, sexo e endereço saíram daqui: este sistema cuida de
+         aprendizado e retenção, e a ficha pessoal do aluno pertence ao sistema
+         de aula da escola. Menos dado guardado é menos coisa a vazar. -->
+    <p class="nota-privacidade">
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-shield"></use></svg>
+      Só pedimos nome e turma. Dados pessoais do aluno ficam no sistema de aula da escola.
+    </p>
+
+    <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
+      <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>{{ enviando() ? 'Enviando...' : 'Cadastrar aluno' }}
+    </button>
+  </form>
+
+  <!-- ── Professor ────────────────────────────────────── -->
+  <form *ngIf="abaAtiva() === 'professor'" class="cadastro-form main-card p-4"
+        [formGroup]="professorForm" (ngSubmit)="cadastrarProfessor()" novalidate>
+
+    <h2 class="cadastro-title">Cadastrar Professor</h2>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label" for="prof-nome">Nome:</label>
+        <input type="text" id="prof-nome" formControlName="nome" class="form-control"
+               [class.is-invalid]="fp['nome'].invalid && fp['nome'].touched"
+               placeholder="Digite o nome completo">
+        <div class="invalid-feedback">Nome obrigatório (mínimo 3 caracteres).</div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label" for="prof-nascimento">Data de nascimento:</label>
+        <input type="date" id="prof-nascimento" formControlName="dataNascimento" class="form-control"
+               [min]="limitesProfessor.min" [max]="limitesProfessor.max"
+               [class.is-invalid]="fp['dataNascimento'].invalid && fp['dataNascimento'].touched">
+        <div class="invalid-feedback">Data de nascimento obrigatória (professor maior de idade).</div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label" for="prof-sexo">Sexo:</label>
+        <select id="prof-sexo" formControlName="sexo" class="form-select"
+                [class.is-invalid]="fp['sexo'].invalid && fp['sexo'].touched">
+          <option value="" disabled>Selecione</option>
+          <option value="M">Masculino</option>
+          <option value="F">Feminino</option>
+          <option value="N">Não informar</option>
+        </select>
+        <div class="invalid-feedback">Selecione o sexo.</div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label d-flex align-items-center gap-2 flex-wrap">
+        Matérias que leciona:
+        <span class="contador-materias"
+              [class.no-limite]="materiaIdsSelecionadas.length >= maximoMaterias">
+          {{ materiaIdsSelecionadas.length }} de {{ maximoMaterias }}
+        </span>
+      </label>
+      <div class="materias-grid" [class.invalido]="fp['materiaIds'].invalid && fp['materiaIds'].touched">
+        <!-- Passado o teto, o que não está marcado fica fora de alcance: um clique
+             sem efeito seria lido como bug. -->
+        <button type="button" *ngFor="let m of materias()" class="materia-chip"
+                [class.selecionada]="materiaSelecionada(m.id)"
+                [disabled]="materiaBloqueada(m.id)"
+                (click)="alternarMateria(m.id)">
+          <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (materiaSelecionada(m.id) ? 'check' : 'circ')"></use></svg>
+          {{ m.nome }}
+        </button>
+      </div>
+      <div *ngIf="fp['materiaIds'].invalid && fp['materiaIds'].touched" class="erro-materias">
+        Selecione ao menos uma matéria.
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-cadastro w-100 mt-2" [disabled]="enviando()">
+      <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>{{ enviando() ? 'Enviando...' : 'Cadastrar professor' }}
+    </button>
+  </form>
+
+</div>

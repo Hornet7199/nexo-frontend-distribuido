@@ -1,0 +1,115 @@
+<!-- Corpo do perfil do professor. O cabeçalho vem de perfil.html. -->
+
+@if (carregando()) {
+  <div class="content-card estado-vazio">
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-hourglass"></use></svg>
+    Carregando seus dados docentes…
+  </div>
+} @else if (erro()) {
+  <div class="content-card estado-vazio">
+    <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg>
+    Não foi possível carregar seus dados.
+    <div><button class="btn-tentar" (click)="carregar()">Tentar novamente</button></div>
+  </div>
+} @else {
+
+  <!-- ── Indicadores docentes ─────────────────────────── -->
+  <section class="row g-4">
+    @for (kpi of indicadores(); track kpi.label) {
+      <div class="col-6 col-xl-3">
+        <div class="summary-card">
+          <div class="summary-card-top mb-0">
+            <div class="summary-icon" [ngClass]="kpi.cor + '-summary'">
+              @switch (kpi.icone) {
+                @case ('bi-clipboard-check') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-file"></use></svg> }
+                @case ('bi-mortarboard-fill') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-cap"></use></svg> }
+                @case ('bi-pencil-square') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg> }
+                @case ('bi-people-fill') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg> }
+                @default { <i class="bi" [ngClass]="kpi.icone"></i> }
+              }
+            </div>
+            <div>
+              <p class="summary-title">{{ kpi.label }}</p>
+              <h3 class="summary-number">{{ kpi.valor }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="row g-4 mt-1">
+
+    <!-- ── Minhas turmas ──────────────────────────────── -->
+    <div class="col-xl-7">
+      <div class="content-card">
+        <h2 class="section-card-title">
+          <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-users"></use></svg> Minhas Turmas
+        </h2>
+
+        @if (turmas().length) {
+          @for (turma of turmas(); track turma.nome) {
+            <div class="turma-linha">
+              <div class="d-flex justify-content-between align-items-baseline mb-2">
+                <div>
+                  <p class="lista-nome">{{ turma.nome }}</p>
+                  <p class="lista-info">{{ turma.disciplina }} • {{ turma.alunos }} alunos</p>
+                </div>
+                <span class="turma-media" [ngClass]="turma.mediaGeral < 6 ? 'red-text' : 'green-text'">
+                  {{ turma.mediaGeral }}
+                </span>
+              </div>
+              <div class="linha-track">
+                <div class="linha-fill"
+                     [ngClass]="corDaMedia(turma.mediaGeral)"
+                     [style.width.%]="turma.progresso"></div>
+              </div>
+            </div>
+          }
+          <p class="media-rodape">
+            Média consolidada das suas turmas:
+            <strong [ngClass]="mediaGeral() < 6 ? 'red-text' : 'green-text'">{{ mediaGeral() }}</strong>
+          </p>
+        } @else {
+          <div class="estado-vazio">
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-mail"></use></svg>
+            Você ainda não tem turmas atribuídas.
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Alunos que precisam de atenção ─────────────── -->
+    <div class="col-xl-5">
+      <div class="content-card h-100">
+        <h2 class="section-card-title">
+          <svg class="ic title-icon orange-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-alert"></use></svg> Alunos em Atenção
+        </h2>
+
+        @if (alunosAtencao().length) {
+          @for (aluno of alunosAtencao(); track aluno.nome) {
+            <div class="lista-item">
+              <img loading="lazy" decoding="async" class="lista-avatar"
+                   [src]="fotoDe(aluno.foto)"
+                   [alt]="aluno.nome">
+              <div class="flex-grow-1">
+                <p class="lista-nome">{{ aluno.nome }}</p>
+                <p class="lista-info">
+                  {{ aluno.turma }} • Média {{ aluno.mediaAtual }} • Freq. {{ aluno.frequencia }}%
+                </p>
+              </div>
+              <span class="badge-status" [ngClass]="aluno.status">
+                {{ aluno.status === 'critico' ? 'Crítico' : 'Atenção' }}
+              </span>
+            </div>
+          }
+        } @else {
+          <div class="estado-vazio">
+            <i class="bi bi-emoji-smile"></i>
+            Nenhum aluno em situação de atenção.
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}

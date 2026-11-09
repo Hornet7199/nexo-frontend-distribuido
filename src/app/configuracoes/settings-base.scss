@@ -1,0 +1,155 @@
+/* settings-base.scss — estilos base compartilhados pelas três telas de
+   configuração (Task 4): .settings-card, .custom-switch, .btn-gradient etc.
+   Usa apenas variáveis do styles.scss. */
+
+/* A caixa da página e o cabeçalho (.settings-page-title, .settings-page-subtitle)
+   são padronizados no styles.scss §3. Os 34px daqui somavam com o recuo do layout
+   e faziam as configurações começarem 34px à direita de todas as outras telas —
+   era isso que deixava a tela com cara de desalinhada. */
+
+/* A tela de configurações é uma coluna estreita (800px) dentro de uma área de
+   conteúdo bem mais larga. Encostada à esquerda, ela deixava um vão enorme à
+   direita e destoava das demais telas, que ocupam a largura toda. Centralizar a
+   coluna resolve — e o cabeçalho tem que ir junto, senão o título fica sozinho
+   na borda esquerda enquanto os cards estão no meio. */
+.settings-header,
+.settings-wrapper {
+  max-width: 800px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.settings-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+.section-card-title {
+  font-size: 18px; font-weight: 700; color: var(--text-main);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+  .title-icon { font-size: 20px; }
+}
+
+/* Cores dos ícones de secção */
+.purple-text { color: #9b2fff !important; }
+.pink-text   { color: #f2389d !important; }
+.green-text  { color: #06d25e !important; }
+.blue-text   { color: #2196f3 !important; }
+.orange-text { color: #f59e0b !important; }
+.teal-text   { color: #14b8a6 !important; }
+
+/* Item de configuração */
+.settings-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+
+  span {
+    color: var(--text-main);
+    font-weight: 600; font-size: 15px; display: block; margin-bottom: 4px;
+  }
+
+  small { color: var(--text-muted); font-size: 12px; }
+}
+
+.toggle-item { gap: 20px; }
+
+/* Toggle switch */
+.custom-switch {
+  width: 48px; height: 26px; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background: var(--border-color);
+  border-radius: 13px; position: relative;
+  transition: background 0.3s; flex-shrink: 0;
+  outline: none;
+
+  &::before {
+    content: ''; position: absolute;
+    width: 20px; height: 20px; border-radius: 50%;
+    top: 3px; left: 3px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.3s;
+  }
+
+  &:checked {
+    background: var(--nx-brand-deep, #5B21B6);
+    &::before { transform: translateX(22px); }
+  }
+}
+
+/* Campos de texto/horário/seleção (Disponibilidade, Institucional) */
+.field-item { gap: 20px; }
+
+.settings-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-main);
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+  &:focus { border-color: #9b2fff; }
+}
+
+.input-texto { width: 260px; max-width: 100%; }
+
+.settings-error {
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+
+/* Botões de conta */
+.btn-gradient {
+  background: var(--nx-brand-deep, #5B21B6);
+  color: white; border: none; border-radius: 12px;
+  padding: 12px 20px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.2s; width: 100%;
+  &:hover { opacity: 0.9; }
+}
+
+.btn-danger-soft {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px; padding: 12px 20px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s; width: 100%;
+  &:hover { background: rgba(239, 68, 68, 0.18); }
+}
+
+/* No celular o rótulo e o campo não cabem na mesma linha: o .settings-input tem
+   flex-shrink: 0, então quem cedia era o texto — que vazava para fora do card.
+   Aqui o campo desce para baixo do rótulo e ocupa a linha inteira. */
+@media (max-width: 767.98px) {
+  .field-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .settings-input,
+  .input-texto {
+    width: 100%;
+    flex-shrink: 1;
+  }
+
+  /* O toggle continua ao lado do rótulo — ele é estreito e cabe. Só o bloco de
+     texto precisa poder encolher para quebrar em vez de empurrar o switch. */
+  .toggle-item {
+    gap: 12px;
+    > div:first-child { min-width: 0; }
+  }
+}

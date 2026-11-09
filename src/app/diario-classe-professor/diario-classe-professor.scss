@@ -1,0 +1,159 @@
+/* Mixin interno para evitar repetição */
+%card-base {
+  background: var(--bg-card);
+  border-radius: var(--nx-radius-card, 14px);
+  border: 1px solid var(--border-color);
+}
+
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3. */
+
+.main-card {
+  @extend %card-base;
+}
+
+/* CORRIGIDO: era @extend .main-card — substituído por propriedades diretas */
+.metric-card {
+  background: var(--bg-card);
+  border-radius: var(--nx-radius-card, 14px);
+  border: 1px solid var(--border-color);
+  text-align: left;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-2px); }
+}
+
+/* Inputs */
+.form-control-custom,
+.form-select-custom {
+  width: 100%;
+  background-color: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 15px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+
+  &:focus   { border-color: var(--nx-brand, #6D28D9); outline: none; }
+  &::placeholder { color: var(--text-muted); }
+
+  option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+  }
+}
+
+.purple-focus:focus { border-color: var(--nx-brand, #6D28D9) !important; }
+.text-area-custom   { resize: none; }
+
+/* Botões */
+.btn-export {
+  background: #06d25e; color: white; font-weight: bold;
+  border: none; padding: 10px 20px; border-radius: 12px; font-size: 14px;
+  transition: opacity 0.2s; cursor: pointer;
+  &:hover { opacity: 0.9; }
+}
+
+.btn-light-custom {
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  font-weight: bold; border-radius: 12px;
+  padding: 10px 20px; font-size: 13px;
+  transition: background 0.2s; cursor: pointer;
+  &:hover { border-color: var(--nx-brand, #6D28D9); }
+}
+
+/* Tabela de frequência */
+.table-custom {
+  width: 100%; border-collapse: collapse;
+
+  th {
+    color: var(--text-muted); font-size: 12px;
+    font-weight: 600; padding-bottom: 12px;
+  }
+
+  td {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    color: var(--text-main);
+  }
+
+  tr:last-child td { border-bottom: none; }
+}
+
+.table-body-scroll {
+  max-height: 320px; overflow-y: auto; padding-right: 5px;
+  &::-webkit-scrollbar       { width: 5px; }
+  &::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+}
+
+.avatar-student {
+  width: 35px; height: 35px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+/* Botões de presença */
+.btn-presence {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: var(--bg-input); color: var(--text-muted); font-size: 14px;
+  transition: all 0.2s; cursor: pointer;
+
+  &.correct:hover, &.correct.active { background: #06d25e; color: white; }
+  &.wrong:hover,   &.wrong.active   { background: #ff3d00; color: white; }
+}
+
+.btn-icon-obs {
+  background: transparent; border: none;
+  color: var(--text-muted); font-size: 16px; cursor: pointer;
+  &:hover { color: var(--nx-brand, #6D28D9); }
+}
+
+/* Histórico */
+.history-list { max-height: 250px; overflow-y: auto; }
+
+.history-item {
+  background: var(--bg-input);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+
+  .class-title     { color: var(--text-main); font-size: 13px; }
+  .edit-icon-small { cursor: pointer; font-size: 12px; color: var(--text-muted);
+    &:hover { color: var(--text-main); }
+  }
+}
+/* No celular a tabela de frequência vira lista: nome em cima, matrícula e os dois
+   botões embaixo. Antes eram duas tabelas (cabeçalho e corpo) com larguras em % que
+   não fechavam em 360px — a matrícula colava no nome e o botão de falta saía da caixa. */
+@media (max-width: 767.98px) {
+  /* a tabela do cabeçalho: sem colunas, sem cabeçalho */
+  .table-responsive > .table-custom { display: none; }
+
+  .table-body-scroll {
+    max-height: none;
+    padding-right: 0;
+  }
+
+  .table-custom tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .table-custom tbody tr:last-child { border-bottom: none; }
+
+  .table-custom tbody td {
+    display: block;
+    width: auto !important;
+    padding: 0;
+    border-bottom: none;
+    text-align: left !important;
+  }
+  .table-custom tbody td:nth-child(1) { flex: 1 1 100%; }
+  .table-custom tbody td:nth-child(2) { flex: 1 1 auto; font-size: 13px; }
+  .table-custom tbody td:nth-child(3) { flex: 0 0 auto; }
+
+  .btn-presence { width: 44px; height: 44px; font-size: 16px; }
+}

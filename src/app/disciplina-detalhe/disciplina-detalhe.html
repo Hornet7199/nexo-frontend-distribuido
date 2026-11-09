@@ -1,0 +1,175 @@
+<section class="page-content">
+
+  @if (disciplina(); as d) {
+
+    <a routerLink="/materias" class="back-link d-inline-flex align-items-center gap-2 mb-4">
+      <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowl"></use></svg> Voltar para Minhas Matérias
+    </a>
+
+    <!-- Cabeçalho da disciplina -->
+    <div class="discipline-header d-flex align-items-center gap-4 mb-5 flex-wrap">
+      <div [class]="'discipline-icon d-flex align-items-center justify-content-center rounded-4 ' + d.colorClass">
+        @if (d.iconClass) {
+        @switch (d.iconClass) {
+          @case ('bi-heart-pulse') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pulse"></use></svg> }
+          @case ('bi-calculator') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-calc"></use></svg> }
+          @case ('bi-book') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+          @case ('bi-hourglass-split') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-hourglass"></use></svg> }
+          @case ('bi-globe-americas') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-globe"></use></svg> }
+          @case ('bi-lightning-charge') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg> }
+          @case ('bi-palette') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-palette"></use></svg> }
+          @case ('bi-journal-text') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+          @default { <i [class]="'bi ' + d.iconClass"></i> }
+        }
+        }
+        <span *ngIf="d.iconText" class="fw-bold">{{ d.iconText }}</span>
+      </div>
+      <div class="flex-grow-1">
+        <h1 class="page-title fw-bold mb-1" style="color: var(--text-main);">{{ d.title }}</h1>
+        <!-- Progresso real: conteúdos que este aluno marcou como concluídos. -->
+        @if (totalConteudos() > 0) {
+          <div class="d-flex align-items-center gap-3 mt-2">
+            <div class="progress flex-grow-1" style="height: 10px; max-width: 320px;">
+              <div [class]="'progress-bar ' + d.colorClass" [style.width.%]="percentual()"></div>
+            </div>
+            <span class="text-soft fw-bold">{{ percentual() }}%</span>
+          </div>
+          <small class="text-soft d-block mt-2">
+            {{ totalConcluidos() }}/{{ totalConteudos() }} conteúdos concluídos
+          </small>
+        } @else {
+          <p class="text-soft mb-0">Conteúdo ainda não publicado para esta matéria.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Leitura de um conteúdo real selecionado -->
+    @if (topicoSelecionado(); as topico) {
+
+      <button type="button" class="back-link d-inline-flex align-items-center gap-2 mb-4 btn btn-link p-0"
+              (click)="voltarTopicos()">
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowl"></use></svg> Voltar aos conteúdos
+      </button>
+
+      <article class="reading-card card-theme p-4 rounded-4">
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+          @if (topico.minutos) {
+            <span class="leitura-tempo"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> {{ topico.minutos }} min de leitura</span>
+          }
+          <span class="leitura-posicao">{{ topico.ordem }} de {{ conteudos().length }}</span>
+          <app-botao-ouvir class="ms-auto" [id]="'topico-' + topico.id" [texto]="falaDoTopico(topico)" />
+        </div>
+
+        <h2 class="section-title fw-bold mb-2" style="color: var(--text-main);">{{ topico.titulo }}</h2>
+        @if (topico.resumo) {
+          <p class="reading-resumo mb-4">{{ topico.resumo }}</p>
+        }
+
+        <!-- pre-line preserva as quebras: o texto vem em parágrafos curtos, e num
+             bloco só ele viraria a parede de texto que a tela tinha antes. -->
+        <p class="reading-text text-soft mb-0">{{ topico.texto }}</p>
+
+        @if (topico.exemplo) {
+          <aside class="exemplo-box mt-4 p-3 rounded-3">
+            <h3 class="exemplo-titulo mb-2"><i class="bi bi-lightbulb-fill"></i> Na prática</h3>
+            <p class="mb-0">{{ topico.exemplo }}</p>
+          </aside>
+        }
+
+        <!-- Navegação entre tópicos: sem isto, o aluno precisa voltar à lista a
+             cada leitura, e a sequência de estudo se perde. -->
+        <nav class="leitura-nav d-flex justify-content-between align-items-center gap-2 mt-4 pt-3">
+          <button type="button" class="btn-nav" [disabled]="!topicoAnterior()"
+                  (click)="irParaAnterior()">
+            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowl"></use></svg> Anterior
+          </button>
+
+          @if (topicoProximo(); as prox) {
+            <button type="button" class="btn-nav btn-nav-destaque" (click)="irParaProximo()">
+              Próximo: {{ prox.titulo }} <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowr"></use></svg>
+            </button>
+          } @else {
+            <span class="fim-da-materia"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> Você chegou ao fim</span>
+          }
+        </nav>
+      </article>
+
+    } @else {
+
+      <h2 class="section-title fw-bold mb-4" style="color: var(--text-main);">
+        Conteúdos da disciplina
+      </h2>
+
+      <!-- Conteúdo real cadastrado (piloto: Matemática) -->
+      @if (conteudos().length > 0) {
+
+        <div class="row g-4">
+          <div class="col-md-6 col-xl-4" *ngFor="let c of conteudos(); let i = index">
+            <div class="topic-card card-theme p-4 rounded-4 h-100 d-flex flex-column align-items-start gap-2"
+                 [class.concluido]="estaConcluido(c)">
+              <div class="d-flex align-items-center gap-3 w-100">
+                <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
+                  @if (estaConcluido(c)) { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> } @else { {{ i + 1 }} }
+                </div>
+                <div class="flex-grow-1 topic-heading">
+                  <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ c.titulo }}</h3>
+                  @if (c.minutos) {
+                    <span class="leitura-tempo"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> {{ c.minutos }} min</span>
+                  }
+                </div>
+                <!-- Marcar fica separado de abrir: um clique só teria de adivinhar
+                     qual das duas coisas o aluno queria. -->
+                <button type="button" class="btn-concluir"
+                        [class.marcado]="estaConcluido(c)"
+                        [disabled]="salvandoId() === c.id"
+                        (click)="alternarConcluido(c)"
+                        [attr.aria-pressed]="estaConcluido(c)"
+                        [attr.aria-label]="(estaConcluido(c) ? 'Desmarcar' : 'Marcar como concluído') + ': ' + c.titulo">
+                  <svg class="ic" aria-hidden="true"><use [attr.href]="'assets/icones/nexo-icons.svg#ic-' + (estaConcluido(c) ? 'check' : 'circ')"></use></svg>
+                </button>
+              </div>
+
+              <!-- O resumo é o que faz o card valer o clique: o aluno já sabe o
+                   que vai encontrar antes de abrir. -->
+              <p class="topic-resumo text-soft mb-0">{{ c.resumo }}</p>
+
+              <button type="button" class="topic-cta mt-auto" (click)="selecionarTopico(c)">
+                {{ estaConcluido(c) ? 'Reler' : 'Ler agora' }} <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-arrowr"></use></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      } @else if (!carregandoConteudo()) {
+
+        <!-- Sem conteúdo real cadastrado ainda: tópicos ilustrativos do mock -->
+        <div class="row g-4">
+          <div class="col-md-6 col-xl-4" *ngFor="let topic of d.topics; let i = index">
+            <div class="topic-card card-theme p-4 rounded-4 h-100 d-flex align-items-center gap-3">
+              <div [class]="'topic-number d-flex align-items-center justify-content-center rounded-3 ' + d.colorClass">
+                {{ i + 1 }}
+              </div>
+              <div>
+                <h3 class="topic-title mb-1" style="color: var(--text-main);">{{ topic }}</h3>
+                <small class="text-soft">Módulo {{ i + 1 }} de {{ d.topics.length }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      }
+
+    }
+
+  } @else {
+
+    <div class="not-found text-center py-5">
+      <svg class="ic display-1 text-soft" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-help"></use></svg>
+      <h1 class="fw-bold mt-3" style="color: var(--text-main);">Disciplina não encontrada</h1>
+      <p class="text-soft">A disciplina que você tentou acessar não existe.</p>
+      <a routerLink="/materias" class="btn btn-voltar mt-2">Voltar para Minhas Matérias</a>
+    </div>
+
+  }
+
+</section>

@@ -1,0 +1,196 @@
+<!-- /dashboards é a tela em que todo mundo cai depois do login, então ela
+     despacha para o painel do perfil. Sem o ramo do professor ele caía no
+     layout do aluno, que pede o painel de gamificação a uma API que não existe
+     para ele — daí o "Olá, !" sem nome e o erro de carregamento. -->
+<!-- Nenhum ramo embrulha o painel: o recuo da página é do layout (app.html), e o
+     .page-container-pushed que ficava aqui somava um segundo recuo — o painel do
+     diretor abria 64px da borda e o do administrador 32px. O ramo do aluno tinha
+     ainda um segundo .main-content dentro do de verdade, herdando margem lateral
+     e 100vh de altura de um container que já tinha os dois. -->
+@if (authService.usuarioLogado()?.role === 'diretor') {
+<app-dashboard-diretor></app-dashboard-diretor>
+} @else if (authService.usuarioLogado()?.role === 'admin') {
+<app-admin-dashboard></app-admin-dashboard>
+} @else if (authService.usuarioLogado()?.role === 'professor') {
+<app-dashboard-professor></app-dashboard-professor>
+} @else {
+    <section class="page-content">
+
+        <section class="dashboard-welcome-card mb-4">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <h1 class="profile-page-name">Olá, {{ nome() }}! 👋</h1>
+                    <p class="profile-page-level mb-0">Continue assim! Você está no caminho certo para bater sua
+                        meta semanal de {{ metaSemanalXp() }} XP.</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <button class="btn-action-primary">
+                        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-play"></use></svg> Continuar Estudos
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        @if (carregando()) {
+          <p class="text-soft">Carregando seu painel…</p>
+        } @else if (erro()) {
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <p class="text-soft mb-0">Não foi possível carregar seu painel.</p>
+            <button class="btn-action-primary" (click)="carregar()">Tentar novamente</button>
+          </div>
+        } @else {
+
+        <section class="profile-summary-section mb-4">
+            <div class="row g-4">
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card shadow-sm">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon purple-summary">
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg>
+                            </div>
+                            <div>
+                                <p class="summary-title">XP na Semana</p>
+                                <h3 class="summary-number">{{ xpSemana() }}</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill" [style.width.%]="xpPercent()"></div>
+                        </div>
+                        <p class="summary-footer-text mt-2 mb-0">Meta semanal: {{ metaSemanalXp() }} XP</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card shadow-sm">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon fire-summary">
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-flame"></use></svg>
+                            </div>
+                            <div>
+                                <p class="summary-title">Ofensiva</p>
+                                <h3 class="summary-number">{{ ofensivaDias() }} dias</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill orange-fill" [style.width.%]="ofensivaDias() > 0 ? 100 : 0"></div>
+                        </div>
+                        <p class="summary-footer-text mt-2 mb-0">Mantenha sua sequência!</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card shadow-sm">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon gold-summary">
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trophy"></use></svg>
+                            </div>
+                            <div>
+                                <p class="summary-title">Posição</p>
+                                <h3 class="summary-number">{{ foraDoRanking() ? '—' : '#' + posicao() }}</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill blue-fill" style="width: 90%;"></div>
+                        </div>
+                        <p class="summary-footer-text mt-2 mb-0">{{ foraDoRanking() ? 'Fora do ranking' : 'Turma ' + turmaNome() }}</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3">
+                    <div class="summary-card shadow-sm">
+                        <div class="summary-card-top mb-3">
+                            <div class="summary-icon green-summary">
+                                <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg>
+                            </div>
+                            <div>
+                                <p class="summary-title">Tarefas Hoje</p>
+                                <h3 class="summary-number">{{ tarefasFeitasHoje() }}/{{ tarefasHoje() }}</h3>
+                            </div>
+                        </div>
+                        <div class="summary-progress-track">
+                            <div class="summary-progress-fill green-fill" [style.width.%]="tarefasPercent()"></div>
+                        </div>
+                        <p class="summary-footer-text mt-2 mb-0">
+                            {{ tarefasRestantes() === 0 ? 'Tudo concluído! 🎉' : 'Faltam ' + tarefasRestantes() + ' tarefa(s)' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="middle-section">
+            <div class="row g-4">
+                <div class="col-xl-8">
+                    <div class="content-card shadow-sm">
+                        <h2 class="section-card-title">
+                            <svg class="ic title-icon purple-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg>
+                            Atividades Recentes
+                        </h2>
+
+                        <div class="subject-progress-list mt-4">
+                            <div class="subject-progress-item mb-3" *ngFor="let act of atividades()">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="achievement-emoji" style="font-size: 24px;">{{ act.icone }}</div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold title-adaptive">{{ act.titulo }}</h6>
+                                            <small class="text-soft">{{ act.materia }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="d-block fw-bold title-adaptive xp-ganho">+{{ act.xp }} XP</span>
+                                        <small class="text-soft">{{ act.tempo }}</small>
+                                    </div>
+                                </div>
+                                <div class="subject-line-track">
+                                    <div [class]="'subject-line-fill ' + act.corProgresso"
+                                        [style.width.%]="act.progresso"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (mostrarRanking()) {
+                <div class="col-xl-4">
+                    <div class="content-card shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="section-card-title m-0">
+                                <svg class="ic title-icon blue-text" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bars"></use></svg>
+                                Ranking
+                            </h2>
+                        </div>
+
+                        @if (foraDoRanking()) {
+                            <p class="text-soft small mb-3">
+                                Você está fora do ranking e não aparece para os outros alunos.
+                                Para voltar, ligue <strong>Exibir no ranking</strong> em Configurações → Privacidade.
+                            </p>
+                        }
+
+                        <div class="ranking-list d-flex flex-column gap-3">
+                            <div class="rank-item-card" *ngFor="let user of ranking()" [class.user-is-me]="user.isMe">
+                                <div class="d-flex align-items-center">
+                                    <span class="rank-position" [class.gold-text]="user.pos === 1"
+                                        [class.text-soft]="user.pos > 3">
+                                        #{{ user.pos }}
+                                    </span>
+                                    <img loading="lazy" decoding="async" [src]="user.foto" alt="Foto" class="rank-user-img ms-3">
+                                    <div class="ms-3 flex-grow-1">
+                                        <p class="mb-0 fw-bold title-adaptive fs-6">{{ user.nome }}</p>
+                                        <small class="text-soft">{{ user.xp }} XP</small>
+                                    </div>
+                                    <svg class="ic green-text" *ngIf="user.isMe" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-up"></use></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </section>
+
+        }
+
+    </section>
+}

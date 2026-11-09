@@ -1,0 +1,246 @@
+<div class="page-container">
+  <header class="dashboard-header mb-4">
+    <h1 class="page-title fw-bold">Gestão de Avaliações e Correções</h1>
+    <p class="text-soft m-0">Criação, configuração e correção de avaliações pedagógicas</p>
+  </header>
+
+  <!-- ── KPIs ──────────────────────────────────────────── -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-3" *ngFor="let stat of stats()">
+      <div class="metric-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-soft small mb-1">{{ stat.label }}</p>
+            <h2 class="fw-bold mb-0 text-main">{{ stat.value }}</h2>
+          </div>
+          <div class="icon-square" [ngClass]="stat.color">
+            @switch (stat.icon) {
+              @case ('bi-check2-circle') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-check"></use></svg> }
+              @case ('bi-clock-history') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-clock"></use></svg> }
+              @case ('bi-graph-up') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trend"></use></svg> }
+              @case ('bi-journal-text') { <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+              @default { <i [class]="'bi ' + stat.icon"></i> }
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Abas ──────────────────────────────────────────── -->
+  <div class="tabs-container mb-4">
+    <button class="tab-btn" [class.active]="abaAtiva === 'ativas'"   (click)="setAba('ativas')">Avaliações Ativas</button>
+    <button class="tab-btn" [class.active]="abaAtiva === 'correcao'" (click)="setAba('correcao')">Fila de Correção</button>
+    <button class="tab-btn" [class.active]="abaAtiva === 'questoes'" (click)="setAba('questoes')">Banco de Questões</button>
+    <button class="tab-btn" [class.active]="abaAtiva === 'criar'"    (click)="setAba('criar')">Criar Avaliação</button>
+  </div>
+
+  <!-- ── Aba: Avaliações Ativas ────────────────────────── -->
+  <div *ngIf="abaAtiva === 'ativas'">
+    <div class="main-card p-3 mb-4">
+      <div class="search-box">
+        <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+        <input type="text" class="form-control-custom" [(ngModel)]="buscaTermo" placeholder="Buscar avaliações...">
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12" *ngFor="let avaliacao of avaliacoesFiltradas()">
+        <div class="main-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <span class="status-badge me-2" [ngClass]="avaliacao.statusClasse">{{ avaliacao.status }}</span>
+              <h3 class="h5 text-main fw-bold d-inline-block align-middle mb-0">{{ avaliacao.titulo }}</h3>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn-action" (click)="verDetalhes(avaliacao)"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-eye"></use></svg></button>
+            </div>
+          </div>
+          <p class="text-soft small mb-3">{{ avaliacao.tipo }} • {{ avaliacao.turma }} • {{ avaliacao.data }}</p>
+          <div class="d-flex align-items-center gap-3 linha-progresso">
+            <span class="text-soft small mb-0 text-nowrap">Progresso de Correção</span>
+            <div class="progress w-100">
+              <div class="progress-bar" [style.width]="(avaliacao.corrigidas / avaliacao.total * 100) + '%'"></div>
+            </div>
+            <span class="text-main small fw-bold text-nowrap">
+              {{ avaliacao.corrigidas }}/{{ avaliacao.total }}
+              ({{ (avaliacao.corrigidas / avaliacao.total * 100) | number:'1.0-0' }}%)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Aba: Fila de Correção ─────────────────────────── -->
+  <div *ngIf="abaAtiva === 'correcao'">
+    <div class="main-card p-4 table-responsive-custom">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Avaliação</th>
+            <th>Turma</th>
+            <th>Data</th>
+            <th>Pendentes</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filaCorrecao()">
+            <td class="text-main fw-bold">{{ item.avaliacao }}</td>
+            <td class="text-soft">{{ item.turma }}</td>
+            <td class="text-soft">{{ item.data }}</td>
+            <td><span class="priority-tag alta">{{ item.pendentes }} pendente(s)</span></td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-gradient py-1 px-3">
+                <svg class="ic me-1" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg> Corrigir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filaCorrecao().length === 0">
+            <td colspan="5" class="text-soft text-center py-3">Nenhuma avaliação aguardando correção.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Aba: Banco de Questões ────────────────────────── -->
+  <div *ngIf="abaAtiva === 'questoes'">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="h4 text-main fw-bold mb-0">Banco de Questões</h2>
+      <button class="btn btn-gradient" (click)="abrirNovaQuestao()">
+        <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-plus"></use></svg> Nova Questão
+      </button>
+    </div>
+
+    <div class="main-card p-4 mb-3" *ngIf="mostrarFormQuestao">
+      <h4 class="h6 text-main fw-bold mb-3">{{ editandoQuestaoId ? 'Editar Questão' : 'Nova Questão' }}</h4>
+      <textarea class="form-control-custom w-100 p-2 mb-2" rows="2" [(ngModel)]="novaQuestao.enunciado"
+                placeholder="Enunciado da questão"></textarea>
+      <div class="row g-2">
+        <div class="col-md-4">
+          <input type="text" class="form-control-custom w-100 p-2" [(ngModel)]="novaQuestao.disciplina" placeholder="Disciplina">
+        </div>
+        <div class="col-md-4">
+          <select class="form-select-custom" [(ngModel)]="novaQuestao.tipo">
+            <option value="OBJETIVA">Objetiva</option>
+            <option value="DISSERTATIVA">Dissertativa</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <select class="form-select-custom" [(ngModel)]="novaQuestao.dificuldade">
+            <option value="FACIL">Fácil</option>
+            <option value="MEDIA">Médio</option>
+            <option value="DIFICIL">Difícil</option>
+          </select>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn btn-outline-main px-3" (click)="mostrarFormQuestao = false">Cancelar</button>
+        <button class="btn btn-gradient px-4" (click)="salvarQuestao()">{{ editandoQuestaoId ? 'Salvar' : 'Adicionar' }}</button>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-12" *ngFor="let q of bancoQuestoes()">
+        <div class="main-card p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h4 class="h6 text-main fw-bold mb-0">{{ q.enunciado }}</h4>
+            <div class="d-flex gap-2">
+              <button class="btn-action" (click)="editarQuestao(q)"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pencil"></use></svg></button>
+              <button class="btn-action btn-delete" (click)="excluirQuestao(q)"><svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-trash"></use></svg></button>
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge-tag type">{{ q.tipo }}</span>
+            <span class="badge-tag" [ngClass]="q.dificuldade === 'Fácil' ? 'facil' : q.dificuldade === 'Difícil' ? 'dificil' : 'medio'">
+              {{ q.dificuldade }}
+            </span>
+            <span class="badge-tag context" *ngFor="let tag of q.tags">{{ tag }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12" *ngIf="bancoQuestoes().length === 0">
+        <p class="text-soft">Nenhuma questão cadastrada ainda.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Aba: Criar Avaliação (com ngModel binding) ─────── -->
+  <div *ngIf="abaAtiva === 'criar'">
+    <div class="main-card p-4">
+      <h2 class="h4 text-main fw-bold mb-4">Criar Nova Avaliação</h2>
+
+      <div *ngIf="mensagemSucesso" class="alert alert-success mb-3">{{ mensagemSucesso }}</div>
+      <div *ngIf="mensagemErro"    class="alert alert-danger  mb-3">{{ mensagemErro }}</div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="text-soft small mb-1 d-block">Título da Avaliação *</label>
+          <input type="text" class="form-control-custom placeholder-padded"
+                 [(ngModel)]="novaAvaliacao.titulo"
+                 placeholder="Ex: Prova Bimestral — Funções Exponenciais">
+        </div>
+        <div class="col-md-6">
+          <label class="text-soft small mb-1 d-block">Tipo de Avaliação *</label>
+          <select class="form-select-custom" [(ngModel)]="novaAvaliacao.tipo">
+            <option value="">Selecione o tipo</option>
+            <option *ngFor="let tipo of tiposAvaliacao" [value]="tipo">{{ tipo }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="text-soft small mb-1 d-block">Turma *</label>
+          <select class="form-select-custom" [(ngModel)]="novaAvaliacao.turmaId">
+            <option [ngValue]="null">Selecione a turma</option>
+            <option *ngFor="let t of turmas()" [ngValue]="t.id">{{ t.nome }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="text-soft small mb-1 d-block">Nota Máxima</label>
+          <input type="number" class="form-control-custom placeholder-padded"
+                 [(ngModel)]="novaAvaliacao.notaMaxima" min="0" max="100">
+        </div>
+        <div class="col-md-3">
+          <label class="text-soft small mb-1 d-block">Peso na Média</label>
+          <input type="number" class="form-control-custom placeholder-padded"
+                 [(ngModel)]="novaAvaliacao.peso" min="1" max="10">
+        </div>
+        <div class="col-md-6">
+          <label class="text-soft small mb-1 d-block">Data de Aplicação</label>
+          <input type="date" class="form-control-custom placeholder-padded"
+                 [(ngModel)]="novaAvaliacao.dataAplicacao">
+        </div>
+        <div class="col-12">
+          <label class="text-soft small mb-1 d-block">Instruções para os Alunos</label>
+          <textarea class="form-control-custom placeholder-padded" rows="3"
+                    [(ngModel)]="novaAvaliacao.instrucoes"
+                    placeholder="Descreva as instruções e critérios de avaliação...">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-gradient" (click)="criarAvaliacao()">
+          Criar Avaliação
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (detalhe(); as a) {
+    <div class="detalhe-overlay" (click)="fecharDetalhes()">
+      <div class="detalhe-modal" (click)="$event.stopPropagation()">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h3>{{ a.titulo }}</h3>
+          <button class="detalhe-close" (click)="fecharDetalhes()">&times;</button>
+        </div>
+        <div class="detalhe-row"><span class="rot">Tipo</span><span class="val">{{ a.tipo }}</span></div>
+        <div class="detalhe-row"><span class="rot">Turma</span><span class="val">{{ a.turma }}</span></div>
+        <div class="detalhe-row"><span class="rot">Data</span><span class="val">{{ a.data }}</span></div>
+        <div class="detalhe-row"><span class="rot">Status</span><span class="val">{{ a.status }}</span></div>
+        <div class="detalhe-row"><span class="rot">Entregas</span><span class="val">{{ a.total }}</span></div>
+        <div class="detalhe-row"><span class="rot">Correções feitas</span><span class="val">{{ a.corrigidas }} / {{ a.total }}</span></div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,99 @@
+/* A caixa da página (recuo, fundo, altura) é padronizada no styles.scss §3 —
+   repetir aqui era o que fazia cada tela começar numa coluna diferente. */
+
+.tabs-container {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  flex-wrap: wrap;
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: var(--nx-radius-card, 14px);
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover { color: var(--text-main); }
+
+    &.active {
+      background: #06d25e;
+      color: #ffffff;
+    }
+  }
+}
+
+.status-badge {
+  font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 8px;
+  &.em-correcao { background: rgba(255, 193, 7, 0.12); color: #ffc107; }
+  &.aguardando  { background: rgba(47, 128, 237, 0.12); color: #2f80ed; }
+  &.concluida   { background: rgba(6, 210, 94, 0.12);  color: #06d25e; }
+}
+
+.priority-tag {
+  font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 6px;
+  text-transform: uppercase;
+  &.alta  { background: rgba(255, 61, 0, 0.12);  color: #ff3d00; }
+  &.media { background: rgba(255, 193, 7, 0.12); color: #ffc107; }
+  &.baixa { background: rgba(6, 210, 94, 0.12);  color: #06d25e; }
+}
+
+.badge-tag {
+  font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 500;
+  &.type    { background: color-mix(in srgb, var(--nx-brand, #6D28D9) 10%, transparent); color: var(--nx-brand, #6D28D9); }
+  &.facil   { background: rgba(6, 210, 94, 0.1);  color: #06d25e; }
+  &.medio   { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+  &.dificil { background: rgba(255, 61, 0, 0.1);  color: #ff3d00; }
+  &.context { background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-color); }
+}
+
+.btn-action {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; cursor: pointer;
+  &:hover { border-color: var(--text-muted); }
+  &.btn-delete:hover { background: rgba(255, 61, 0, 0.1); color: #ff3d00; border-color: #ff3d00; }
+}
+
+.table-responsive-custom { overflow-x: auto; }
+
+.custom-table {
+  width: 100%; border-collapse: collapse;
+  th {
+    color: var(--text-muted); font-size: 12px; font-weight: 600;
+    padding: 12px; border-bottom: 1px solid var(--border-color);
+  }
+  td {
+    padding: 16px 12px; border-bottom: 1px solid var(--border-color);
+    vertical-align: middle; color: var(--text-main);
+  }
+  tr:last-child td { border-bottom: none; }
+}
+
+.btn-outline-main {
+  border: 1px solid var(--border-color); color: var(--text-main);
+  font-weight: 600; border-radius: 12px; padding: 10px 20px;
+  background: transparent; cursor: pointer;
+  &:hover { border-color: var(--nx-brand, #6D28D9); color: var(--nx-brand, #6D28D9); }
+}
+/* Rótulo, barra e contagem dividem uma linha só. Os dois textos têm text-nowrap
+   e a barra tem w-100: juntos eles nunca cabiam num celular e a contagem saía
+   para fora do card. Aqui o rótulo fica em cima e a barra divide a linha de
+   baixo com a contagem. */
+@media (max-width: 767.98px) {
+  .linha-progresso {
+    flex-wrap: wrap;
+    gap: 8px !important;
+
+    > span:first-child { width: 100%; }
+    .progress { flex: 1 1 auto; width: auto !important; }
+  }
+}

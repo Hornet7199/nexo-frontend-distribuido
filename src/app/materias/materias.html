@@ -1,0 +1,133 @@
+<section class="page-content"> 
+    <div class="page-heading mb-4">
+        <h1 class="page-title fw-bold">
+            Minhas Matérias
+        </h1>
+        <p class="text-soft fs-5">
+            Explore todo o conteúdo disponível por disciplina
+        </p>
+    </div>
+
+    <!-- O seletor de "nível" saiu: a lista já chega recortada pela etapa do aluno
+         (o servidor decide). No lugar dele, o filtro que o aluno de fato usa —
+         onde ele parou —, com a contagem em cada aba para não clicar no vazio. -->
+    <section class="filters-box p-4 rounded-4 shadow-sm mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-6">
+                <div class="search-box custom-input d-flex align-items-center px-3 py-2 rounded-pill">
+                    <svg class="ic me-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+                    <input
+                        type="text"
+                        [ngModel]="buscaDeTermos()" (ngModelChange)="buscaDeTermos.set($event)"
+                        class="form-control border-0 bg-transparent shadow-none"
+                        placeholder="Buscar matéria..."
+                        aria-label="Buscar matéria"
+                    >
+                    @if (buscaDeTermos()) {
+                        <button type="button" class="btn-limpar-busca" (click)="limparBusca()" aria-label="Limpar busca">
+                            <svg class="ic" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-x"></use></svg>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="filtro-abas d-flex flex-wrap gap-2">
+                    @for (opcao of opcoesFiltro; track opcao.valor) {
+                        <button type="button" class="filtro-aba"
+                                [class.ativa]="filtro() === opcao.valor"
+                                (click)="selecionarFiltro(opcao.valor)">
+                            {{ opcao.rotulo }}
+                            <span class="filtro-contagem">{{ contagem()[opcao.valor] }}</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @if (carregando()) {
+        <p class="text-soft">Carregando suas matérias…</p>
+    } @else if (erro()) {
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <p class="text-soft mb-0">Não foi possível carregar suas matérias.</p>
+            <button class="btn-limpar-filtros" (click)="carregar()">Tentar novamente</button>
+        </div>
+    } @else {
+
+    <section class="subjects-section mb-5">
+        @if (filtradas().length === 0) {
+            <div class="sem-resultado card-theme p-4 rounded-4 text-center">
+                <svg class="ic fs-3 text-soft" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-search"></use></svg>
+                <p class="text-soft mt-2 mb-3">Nenhuma matéria encontrada com esses filtros.</p>
+                <button class="btn-limpar-filtros" (click)="limparBusca(); selecionarFiltro('todas')">
+                    Limpar filtros
+                </button>
+            </div>
+        }
+        <div class="row g-4">
+            <div class="col-md-6 col-xl-4" *ngFor="let subject of filtradas()">
+                <div class="subject-card card-theme p-4 rounded-5 shadow-sm h-100 d-flex flex-column">
+                    <div class="subject-header d-flex justify-content-between align-items-start gap-2 mb-4">
+                        <div class="d-flex gap-3 subject-identity">
+                            <div [class]="'subject-icon d-flex align-items-center justify-content-center rounded-4 ' + subject.colorClass"
+                                 style="width: 70px; height: 70px; color: #fff;">
+                                @if (subject.iconClass) {
+                                @switch (subject.iconClass) {
+                                  @case ('bi-heart-pulse') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-pulse"></use></svg> }
+                                  @case ('bi-calculator') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-calc"></use></svg> }
+                                  @case ('bi-book') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+                                  @case ('bi-hourglass-split') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-hourglass"></use></svg> }
+                                  @case ('bi-globe-americas') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-globe"></use></svg> }
+                                  @case ('bi-lightning-charge') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-bolt"></use></svg> }
+                                  @case ('bi-palette') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-palette"></use></svg> }
+                                  @case ('bi-journal-text') { <svg class="ic fs-2" aria-hidden="true"><use href="assets/icones/nexo-icons.svg#ic-book"></use></svg> }
+                                  @default { <i [class]="'bi ' + subject.iconClass + ' fs-2'"></i> }
+                                }
+                                }
+                                <span *ngIf="subject.iconText" class="fw-bold">{{subject.iconText}}</span>
+                            </div>
+                            <div>
+                                <h2 class="subject-title" style="color: var(--text-main); font-size: 1.25rem;">{{subject.title}}</h2>
+                                <p class="text-soft">{{ subject.progress === 0 ? 'Não iniciada' : subject.progress === 100 ? 'Concluída' : 'Em andamento' }}</p>
+                            </div>
+                        </div>
+                        <span class="badge rounded-pill bg-light fw-bold p-2 text-dark">
+                            ↗ {{subject.progress}}%
+                        </span>
+                    </div>
+                    <div class="subject-progress mb-4">
+                        <div class="progress mb-2" style="height: 10px;">
+                            <div [class]="'progress-bar ' + subject.colorClass" [style.width.%]="subject.progress"></div>
+                        </div>
+                        <small class="text-soft">
+                            @if (subject.totalLessons > 0) {
+                                {{subject.completedLessons}}/{{subject.totalLessons}} conteúdos concluídos
+                            } @else {
+                                Conteúdo ainda não publicado
+                            }
+                        </small>
+                    </div>
+                    <a [routerLink]="['/disciplina', subject.id]"
+                       [class]="'btn text-white fw-bold py-3 rounded-4 mt-auto ' + subject.colorClass">
+                        Acessar Disciplina
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-section mt-5">
+        <h2 class="fw-bold mb-4" style="color: var(--text-main);">Estatísticas Gerais</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-6 col-xl-3" *ngFor="let stat of stats()">
+                <div class="stat-box card-theme p-4 rounded-4 shadow-sm">
+                    <h3 class="stat-number" style="color: var(--text-main);">{{stat.value}}</h3>
+                    <p class="text-soft">{{stat.label}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    }
+</section>

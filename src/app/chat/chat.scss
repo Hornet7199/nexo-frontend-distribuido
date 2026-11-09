@@ -1,0 +1,94 @@
+/* chat.scss — usa apenas variáveis do styles.scss */
+
+.chat-side,
+.chat-window {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--nx-radius-card, 14px);
+}
+
+.chat-window { min-height: 520px; }
+
+.avatar-img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+
+.conn-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #ef4444; display: inline-block;
+  &.on { background: #06d25e; box-shadow: 0 0 0 3px rgba(6, 210, 94, 0.2); }
+}
+
+.contato-item {
+  border: 1px solid var(--border-color);
+  border-radius: 14px; cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  &:hover { background: var(--hover-overlay); }
+  &.active { border-color: var(--nx-brand, #6D28D9); background: var(--hover-overlay); }
+}
+
+.extra-small { font-size: 11px; }
+
+.chat-header { border-bottom: 1px solid var(--border-color); }
+
+.chat-body {
+  overflow-y: auto;
+  max-height: 60vh;
+  min-height: 240px;
+  padding-right: 6px;
+  scroll-behavior: smooth;
+
+  /* Barra de rolagem visível: sem ela não fica claro que há mensagens acima/abaixo. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 8px;
+  }
+  &::-webkit-scrollbar-thumb:hover { background: var(--nx-brand-deep, #5B21B6); }
+}
+
+.bolha {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: var(--nx-radius-card, 14px);
+  background: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+
+  &.minha {
+    background: var(--nx-brand-deep, #5B21B6);
+    color: #fff;
+    border: none;
+  }
+}
+
+.chat-field {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  &:focus { border-color: var(--nx-brand, #6D28D9); box-shadow: none; background: var(--bg-primary); color: var(--text-main); }
+  &::placeholder { color: var(--text-muted); }
+}
+
+.btn-enviar {
+  background: var(--nx-brand-deep, #5B21B6);
+  color: #fff; border: none; border-radius: 12px;
+  &:hover { opacity: 0.9; color: #fff; }
+  &:disabled { opacity: 0.5; }
+}
+
+/* Botão primário do redesign: marca profunda, texto branco, hover mais escuro */
+.btn-enviar {
+  min-height: 44px;
+  color: #FFFFFF;
+  border-radius: var(--nx-radius-control, 10px);
+  opacity: 1;
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
+  }
+}

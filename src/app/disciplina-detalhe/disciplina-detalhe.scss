@@ -1,0 +1,223 @@
+/* disciplina-detalhe.scss — usa apenas variáveis do styles.scss */
+
+/* A caixa da página e o .page-title são padronizados no styles.scss §3. */
+
+.back-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+  &:hover { color: var(--nx-brand, #6D28D9); }
+}
+
+.discipline-icon {
+  width: 96px; height: 96px;
+  color: #fff;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.section-title { font-size: 1.5rem; }
+
+.card-theme {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-3px); }
+}
+
+.topic-card {
+  min-height: 96px;
+  cursor: pointer;
+
+  /* O card inteiro é um <button>: sem isto o nome longo de um tópico estica a
+     linha e empurra o relógio para fora. */
+  .topic-heading { min-width: 0; }
+
+  &:hover .topic-cta { color: var(--nx-brand, #6D28D9); gap: 10px; }
+}
+
+.topic-number {
+  width: 48px; height: 48px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.topic-title { font-size: 1.05rem; font-weight: 700; overflow-wrap: break-word; }
+
+.topic-resumo { font-size: 0.9rem; line-height: 1.5; }
+
+.topic-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: color 0.2s, gap 0.2s;
+}
+
+/* Etiqueta de tempo: promessa curta é o que faz o aluno começar. */
+.leitura-tempo,
+.leitura-posicao {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--hover-overlay);
+  border: 1px solid var(--border-color);
+  border-radius: var(--nx-radius-card, 14px);
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.reading-card {
+  max-width: 860px;
+  /* O card de leitura não é clicável; o translateY do .card-theme daria a
+     entender que é. */
+  &:hover { transform: none; }
+}
+
+.reading-resumo {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.5;
+  border-left: 3px solid var(--nx-brand, #6D28D9);
+  padding-left: 14px;
+}
+
+.reading-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+/* Caixa do exemplo — fecha a leitura com algo concreto. */
+.exemplo-box {
+  background: color-mix(in srgb, var(--nx-brand, #6D28D9) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--nx-brand, #6D28D9) 25%, transparent);
+
+  p { color: var(--text-main); line-height: 1.65; font-size: 0.98rem; }
+}
+
+.exemplo-titulo {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--nx-brand, #6D28D9);
+
+  :is(i, .ic) { margin-right: 4px; }
+}
+
+.leitura-nav {
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.btn-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, opacity 0.2s;
+  /* O título do próximo tópico entra no rótulo; sem limite ele estica o botão
+     para fora do card em tela estreita. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) { border-color: var(--nx-brand, #6D28D9); }
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+.btn-nav-destaque {
+  background: var(--nx-brand-deep, #5B21B6);
+  border-color: transparent;
+  color: #fff;
+  &:hover:not(:disabled) { opacity: 0.9; border-color: transparent; }
+}
+
+.fim-da-materia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #06d25e;
+}
+
+.btn-voltar {
+  background: var(--nx-brand-deep, #5B21B6);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 12px 24px; font-weight: 600;
+  &:hover { opacity: 0.9; color: #fff; }
+}
+
+/* Cores por disciplina (mesma paleta da tela de Matérias) */
+.subj-blue   { background: #2E73F6 !important; }
+.subj-cyan   { background: #0E7490 !important; }
+.subj-amber  { background: #A16207 !important; }
+.subj-green  { background: #15803D !important; }
+.subj-red    { background: #DC2626 !important; }
+.subj-purple { background: #7C3AED !important; }
+.subj-pink   { background: #DB2777 !important; }
+.subj-teal   { background: #0F766E !important; }
+.subj-indigo { background: #4F46E5 !important; }
+.subj-orange { background: #0E7490 !important; }
+
+/* ── Conclusão de conteúdo (progresso real do aluno) ─────────────────────── */
+.topic-card.concluido {
+  border-color: rgba(6, 210, 94, 0.45);
+}
+
+.btn-concluir {
+  background: none;
+  border: none;
+  padding: 4px;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s, transform 0.15s;
+
+  &:hover { color: #06d25e; transform: scale(1.1); }
+  &.marcado { color: #06d25e; }
+  &:disabled { opacity: 0.5; cursor: wait; }
+}
+
+/* O CTA virou botão de verdade (o card deixou de ser um <button> para caber o
+   marcar dentro dele); mantém a aparência de link de ação. */
+.topic-cta {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Botão primário do redesign: marca profunda, texto branco, hover mais escuro */
+.btn-nav-destaque, .btn-voltar {
+  min-height: 44px;
+  color: #FFFFFF;
+  border-radius: var(--nx-radius-control, 10px);
+  opacity: 1;
+  &:hover:not(:disabled) {
+    opacity: 1;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--nx-brand-deep, #5B21B6) 85%, #000000);
+  }
+}
